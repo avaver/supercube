@@ -48,34 +48,28 @@ export namespace Giiker {
         stepsHandler = onSteps
         batteryHandler = onBattery
 
-        return new Promise<string>(async (resolve, reject) => {
-            try {
-                const f = [{ namePrefix: 'GiC' }]
-                const s = [UUID.cubeService, UUID.configService]
+        const f = [{ namePrefix: 'GiC' }]
+        const s = [UUID.cubeService, UUID.configService]
 
-                device = await navigator.bluetooth.requestDevice({ filters: f, optionalServices: s })
-                device.ongattserverdisconnected = onDisconnect
-                const server = await device.gatt!.connect()
+        device = await navigator.bluetooth.requestDevice({ filters: f, optionalServices: s })
+        device.ongattserverdisconnected = onDisconnect
+        const server = await device.gatt!.connect()
 
-                const stateService = await server.getPrimaryService(UUID.cubeService)
-                const configService = await server.getPrimaryService(UUID.configService)
+        const stateService = await server.getPrimaryService(UUID.cubeService)
+        const configService = await server.getPrimaryService(UUID.configService)
 
-                stateChar = await stateService.getCharacteristic(UUID.cubeCharacteristic)
-                configChar = await configService.getCharacteristic(UUID.configCharacteristic)
-                const infoChar = await configService.getCharacteristic(UUID.infoCharacteristic)
+        stateChar = await stateService.getCharacteristic(UUID.cubeCharacteristic)
+        configChar = await configService.getCharacteristic(UUID.configCharacteristic)
+        const infoChar = await configService.getCharacteristic(UUID.infoCharacteristic)
 
-                await infoChar.startNotifications()
-                infoChar.oncharacteristicvaluechanged = onInfo
-                await configChar.writeValue(Uint8Array.of(Steps))
-                await configChar.writeValue(Uint8Array.of(Battery))
+        await infoChar.startNotifications()
+        infoChar.oncharacteristicvaluechanged = onInfo
+        await configChar.writeValue(Uint8Array.of(Steps))
+        await configChar.writeValue(Uint8Array.of(Battery))
 
-                await stateChar.startNotifications()
-                stateChar.oncharacteristicvaluechanged = onCubeState
-                resolve(device.name!)
-            } catch (e) {
-                reject(e)
-            }
-        })
+        await stateChar.startNotifications()
+        stateChar.oncharacteristicvaluechanged = onCubeState
+        return device.name!
     }
 
     export async function disconnect() {
@@ -96,6 +90,11 @@ export namespace Giiker {
         } else {
             throw new Error('there are no connected devices')
         }
+    }
+
+    export async function getState(): Promise<Uint8Array> {
+        const value = await stateChar.readValue()
+        return new Uint8Array(value.buffer)
     }
 
     function onInfo(e: any) {

@@ -136,6 +136,7 @@ export class Cube {
 
         this.rs = data
         this.calcps()
+        this.calcvcs()
     }
 
     public solved(): boolean {
@@ -183,8 +184,6 @@ export class Cube {
         this.cpos.forEach((pos, i) => pos.forEach((c, k) => this.ps[c] = this.ccol[this.cp[i] - 1][(this.co[i] + k) % 3]))
         this.epos.forEach((pos, i) => pos.forEach((c, k) => this.ps[c] = this.ecol[this.ep[i] - 1][(this.eo[i] + k) % 2]))
         // tslint:enable:max-line-length
-
-        this.calcvcs()
     }
 
     private normalizeCO(co: Uint8Array) {

@@ -12,13 +12,12 @@
         <v-content>
             <v-container fluid fill-height>
                 <v-layout justify-center>
-                    asd
                 </v-layout>
             </v-container>
         </v-content>
 
-        <v-footer app fixed>
-            <span class="pl-3"><a href="mailto:avaver@gmail.com">avaver@gmail.com</a></span>
+        <v-footer app fixed dark color="secondary">
+            <span class="pl-3"><a href="mailto:avaver@gmail.com" class="subheading font-weight-light white--text">avaver@gmail.com</a></span>
         </v-footer>
     </v-app>
 </template>

@@ -36,7 +36,10 @@
             </v-list-tile>
 
             <v-layout justify-center row>
-                <img @click="updatevcs" :src="vcs" />
+                <v-tooltip bottom>
+                    <img :src="vcs" slot="activator" />
+                    <span>updated once per sec</span>
+                </v-tooltip>
             </v-layout>
         </template>
         <v-list-tile v-else>
@@ -49,7 +52,7 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { EventHub, Events, CubeState } from '../classes/event-hub'
+import { EventHub, Events } from '../classes/event-hub'
 import { Giiker, BatteryInfo } from '../classes/giiker'
 import { Cube } from '../classes/cube'
 
@@ -58,11 +61,12 @@ export default class Device extends Vue {
     private bluetooth = false
     private connected = false
     private loading = false
-    private initial = true
     private name = ''
     private steps = 0
     private battery = new BatteryInfo(0)
     private cube = new Cube()
+
+    private lastStateTimestamp = 0
 
     /* tslint:disable-next-line:max-line-length */
     private vcs = 'http://roudai.net/visualcube/visualcube.php?fmt=png&size=160&r=y39x-30&bg=t&dist=3&sch=white,E53935,1976D2,yellow,F48FB1,69F0AE'
@@ -82,10 +86,12 @@ export default class Device extends Vue {
         try {
             if (Giiker.connected()) {
                 await Giiker.disconnect()
+                this.connected = false
             } else {
                 this.name = await Giiker.connect(this.onState, this.onSteps, this.onBattery, this.onDisconnect)
-                this.connected = true
+                this.setState(await Giiker.getState())
                 EventHub.$emit(Events.cubeConnect, this.name)
+                this.connected = true
             }
         } catch (e) {
             EventHub.$emit(Events.error, e)
@@ -99,7 +105,6 @@ export default class Device extends Vue {
         try {
             if (this.connected) {
                 await Giiker.reset()
-                this.initial = true
                 EventHub.$emit(Events.cubeReset)
             }
         } catch (e) {
@@ -110,12 +115,9 @@ export default class Device extends Vue {
     }
 
     private onState(state: Uint8Array) {
-        this.cube.set(state)
-        EventHub.$emit(Events.cubeState, new CubeState(state, this.initial))
-        if (this.initial) {
-            this.initial = false
-            this.updatevcs()
-        }
+        console.log(state.toHexString())
+        this.setState(state)
+        EventHub.$emit(Events.cubeState, state)
     }
 
     private onSteps(steps: number) {
@@ -129,6 +131,14 @@ export default class Device extends Vue {
     private onDisconnect(e: Event) {
         this.connected = false
         EventHub.$emit(Events.cubeDisconnect, this.name)
+    }
+
+    private setState(state: Uint8Array) {
+        this.cube.set(state)
+
+        const currentTimestamp = Date.now()
+        this.lastStateTimestamp = currentTimestamp
+        setTimeout(() => { if (currentTimestamp === this.lastStateTimestamp) { this.updatevcs() } }, 1000)
     }
 
     private updatevcs() {
