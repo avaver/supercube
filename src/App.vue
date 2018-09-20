@@ -1,29 +1,38 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
-  </div>
+    <v-app>
+        <v-navigation-drawer v-model="drawer" floating clipped app>
+            <Device />
+        </v-navigation-drawer>
+
+        <v-toolbar app clipped-left color="secondary" dark>
+            <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+            <v-toolbar-title>Smart Cube</v-toolbar-title>
+        </v-toolbar>
+
+        <v-content>
+            <v-container fluid fill-height>
+                <v-layout justify-center>
+                    asd
+                </v-layout>
+            </v-container>
+        </v-content>
+
+        <v-footer app fixed>
+            <span class="pl-3"><a href="mailto:avaver@gmail.com">avaver@gmail.com</a></span>
+        </v-footer>
+    </v-app>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator';
-import HelloWorld from './components/HelloWorld.vue';
+import { Component, Vue } from 'vue-property-decorator'
+import Device from './components/Device.vue'
 
 @Component({
-  components: {
-    HelloWorld,
-  },
+    components: {
+        Device
+    }
 })
-export default class App extends Vue {}
-</script>
-
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+export default class App extends Vue {
+    private drawer = false
 }
-</style>
+</script>
