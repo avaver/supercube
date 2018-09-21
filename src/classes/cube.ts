@@ -104,7 +104,7 @@ export class Cube {
         [ 0,  8]  // white
     ]
 
-    private faces = ['b', 'd', 'l', 'u', 'r', 'f']
+    private faces = ['B', 'D', 'L', 'U', 'R', 'F']
 
     // raw state as received from cube
     private rs = new Uint8Array(20)
