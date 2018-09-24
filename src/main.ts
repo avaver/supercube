@@ -29,7 +29,7 @@ Uint8Array.prototype.splitBits = function(start: number, count: number): Uint8Ar
     for (let i = start; i < (start + count); i++) {
         s += this[i].toString(2).padStart(8, '0')
     }
-    return Uint8Array.from(s.split('').map(parseInt))
+    return Uint8Array.from(s.split('').map((c) => parseInt(c, 10)))
 }
 
 Uint8Array.prototype.toHexString = function(): string {

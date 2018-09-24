@@ -67,10 +67,10 @@ export default class App extends Vue {
     private mounted() {
         if (this.nobluetooth = !Giiker.available()) return
 
-        EventHub.$on(Events.error, this.onError)
-        EventHub.$on(Events.cubeState, this.onCubeState)
-        EventHub.$on(Events.cubeConnect, this.onCubeConnect)
-        EventHub.$on(Events.cubeDisconnect, this.onCubeDisconnect)
+        EventHub.$on(Events.error, (e: Error) => this.onError(e))
+        EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
+        EventHub.$on(Events.cubeConnect, (name: string) => this.onCubeConnect(name))
+        EventHub.$on(Events.cubeDisconnect, (name: string) => this.onCubeDisconnect(name))
     }
 
     private onError(e: Error) {
@@ -83,12 +83,10 @@ export default class App extends Vue {
     }
 
     private onCubeConnect(name: string) {
-        this.toast(name + ' connected')
         this.connected = true
     }
 
     private onCubeDisconnect(name: string) {
-        this.toast(name + ' disconnected')
         this.connected = false
     }
 

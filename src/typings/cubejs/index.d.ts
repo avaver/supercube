@@ -29,4 +29,7 @@ declare class Cubejs {
     identity(): void
     isSolved(): boolean
     toJson(): CubejsState
+    move(moves: string): Cubejs
+    move(moves: string[]): Cubejs
+    asString(): string
 }
