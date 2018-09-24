@@ -12,58 +12,90 @@
         <v-content>
             <v-container fluid fill-height>
                 <v-layout justify-center>
+                    <Scramble v-if="connected" />
                 </v-layout>
             </v-container>
         </v-content>
 
         <v-footer app fixed dark color="secondary">
             <v-layout justify-space-around>
-                <div>Scramble: {{scramble}}</div>
-                <div>State: {{state}}</div>
+                <div class="hidden-sm-and-down">State: {{state}}</div>
                 <div><a href="mailto:avaver@gmail.com" class="subheading font-weight-light white--text">avaver@gmail.com</a></div>
             </v-layout>
         </v-footer>
 
-        <v-dialog v-model="loading" hide-overlay persistent width="300">
-            <v-card color="primary" dark>
-                <v-card-text>
-                    Initializing scrambler...
-                    <v-progress-linear indeterminate color="white" class="mb-0"></v-progress-linear>
-                </v-card-text>
+        <v-dialog v-model="nobluetooth" persistent max-width="290">
+            <v-card>
+                <v-card-title class="headline">Ooops!</v-card-title>
+                <v-card-text>It seems your browser doesn't support bluetooth web api. Try checking <a href="https://www.google.com/chrome/canary/">Chrome Canary</a> for your platform.</v-card-text>
             </v-card>
         </v-dialog>
+
+        <v-snackbar v-model="snackbar" :timeout="snackbarTimeout" :color="snackbarColor">
+            {{snackbarText}}
+            <v-btn dark flat @click="snackbar = false">Close</v-btn>
+        </v-snackbar>
     </v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { EventHub, Events } from './classes/event-hub'
+import { Giiker } from './classes/giiker'
 import Device from './components/Device.vue'
-import * as Cubejs from 'cubejs'
-require('cubejs/lib/solve.js')
+import Scramble from './components/Scramble.vue'
 
 @Component({
     components: {
-        Device
+        Device,
+        Scramble
     }
 })
 export default class App extends Vue {
     private drawer = false
-    private loading = true
-    private scramble = ''
+    private snackbar = false
+    private loading = false
+    private nobluetooth = false
+
+    private connected = false
+
+    private snackbarTimeout = 3000
+    private snackbarColor = 'info'
+    private snackbarText = ''
     private state = ''
 
     private mounted() {
-        EventHub.$on(Events.cubeState, (s: Uint8Array) => this.state = s.toHexString())
-        setTimeout(this.init, 1000)
+        if (this.nobluetooth = !Giiker.available()) return
+
+        EventHub.$on(Events.error, this.onError)
+        EventHub.$on(Events.cubeState, this.onCubeState)
+        EventHub.$on(Events.cubeConnect, this.onCubeConnect)
+        EventHub.$on(Events.cubeDisconnect, this.onCubeDisconnect)
     }
 
-    private init() {
-        Cubejs.initSolver()
-        let s = Cubejs.scramble()
-        //let c: Cubejs = new (Cubejs as any)()
-        this.scramble = s
-        this.loading = false
+    private onError(e: Error) {
+        this.toast(e.toString(), 'error')
+        console.log(e)
+    }
+
+    private onCubeState(state: Uint8Array) {
+        this.state = state.toHexString()
+    }
+
+    private onCubeConnect(name: string) {
+        this.toast(name + ' connected')
+        this.connected = true
+    }
+
+    private onCubeDisconnect(name: string) {
+        this.toast(name + ' disconnected')
+        this.connected = false
+    }
+
+    private toast(m: string, c: string = 'info') {
+        this.snackbarText = m
+        this.snackbarColor = c
+        this.snackbar = true
     }
 }
 </script>

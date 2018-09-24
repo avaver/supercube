@@ -226,6 +226,7 @@ export class Cube {
                 return false
             }
         }
+
         return true
     }
 

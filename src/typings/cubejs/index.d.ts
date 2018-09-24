@@ -10,6 +10,7 @@ declare module Cubejs {
     export function inverse(n: number): Cubejs
     export function initSolver(): void
     export function scramble(): string
+    export function asyncInit(worker: string, callback: () => void): void
 }
 
 type CubejsState = {

@@ -69,6 +69,8 @@ export namespace Giiker {
 
         await stateChar.startNotifications()
         stateChar.oncharacteristicvaluechanged = onCubeState
+        stateChar.readValue()
+
         return device.name!
     }
 
@@ -90,11 +92,6 @@ export namespace Giiker {
         } else {
             throw new Error('there are no connected devices')
         }
-    }
-
-    export async function getState(): Promise<Uint8Array> {
-        const value = await stateChar.readValue()
-        return new Uint8Array(value.buffer)
     }
 
     function onInfo(e: any) {
