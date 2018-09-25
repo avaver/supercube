@@ -3,22 +3,23 @@
         <v-flex xs12 sm6>
             <v-card v-if="working">
                 <v-card-title>
-                    <h3>Initializing scrambler...</h3>
+                    <h3>{{operation}}</h3>
                     <v-progress-linear :indeterminate="true"></v-progress-linear>
                 </v-card-title>
             </v-card>
             <v-card v-else>
-                <v-card-title class="display-1">
+                <v-card-title class="headline">
+                    <v-btn flat icon color="primary" @click="generateScrabmle">
+                        <v-icon>refresh</v-icon>
+                    </v-btn>
+
                     <span v-for="(move, index) in scramble" :key="index" :class="[{'grey--text': position > index}, 'pr-2', 'pl-2']">
                         {{move}}
                     </span>
-                    <v-tooltip bottom nudge-left open-delay="0">
-                        <v-icon slot="activator" large class="ml-3" style="cursor: pointer" @click="generateScrabmle">info</v-icon>
-                        <span>
-                            Make sure your cube is solved and follow the scramble<br/>
-                            Keep white face of the cube on top and blue on front<br/>
-                            Scramble moves will become greyed out as you advance
-                        </span>
+
+                    <v-icon class="ml-2 scramble_info" style="cursor: pointer" @click.native.stop="tooltip = !tooltip">info</v-icon>
+                    <v-tooltip bottom open-delay="0" v-model="tooltip" activator=".scramble_info">
+                        <span>U is WHITE and F is BLUE</span>
                     </v-tooltip>
                 </v-card-title>
             </v-card>
@@ -36,6 +37,8 @@ import { Cube } from '@/classes/cube'
 @Component
 export default class Scramble extends Vue {
     private working = false
+    private tooltip = false
+
     private operation = ''
     private scramble: string[] = []
     private position = 0
@@ -67,19 +70,21 @@ export default class Scramble extends Vue {
     }
 
     private onCubeState(state: Uint8Array) {
+        if (!this.scrambleAvailable()) {
+            return
+        }
+
         const a = this.scramble.slice(0, this.position + 1)
         const eCube: Cubejs = Cubejs.random()
         const aCube = new Cube()
         eCube.identity()
         eCube.move(a.join(' '))
         aCube.set(state)
-        const expectedState = eCube.asString()
-        console.log('expected: ' + expectedState)
-        console.log('actual  : ' + aCube.vcs)
-        if (expectedState === aCube.vcs) {
+
+        if (eCube.asString() === aCube.vcs) {
             this.position++
-            if (this.position === this.scramble.length) {
-                alert('ready')
+            if (this.scrambleCompleted()) {
+                EventHub.$emit(Events.cubeScrambled)
             }
         }
     }
@@ -91,6 +96,14 @@ export default class Scramble extends Vue {
 
     private stopOperation() {
         this.working = false
+    }
+
+    private scrambleAvailable() {
+        return this.scramble.length > 0    
+    }
+
+    private scrambleCompleted() {
+        return this.scramble.length > 0 && this.scramble.length === this.position
     }
 }
 </script>

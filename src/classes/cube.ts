@@ -9,6 +9,12 @@ export enum Colors {
 
 export class Cube {
 
+    public static from(data: Uint8Array): Cube {
+        const cube = new Cube()
+        cube.set(data)
+        return cube
+    }
+
     // visual cube state
     public vcs = ''
 

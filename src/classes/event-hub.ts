@@ -6,5 +6,6 @@ export const Events = {
     cubeConnect: 'cube-connect',
     cubeDisconnect: 'cube-disconnect',
     cubeState: 'cube-state',
-    cubeReset: 'cube-reset'
+    cubeReset: 'cube-reset',
+    cubeScrambled: 'cube-scrambled'
 }
