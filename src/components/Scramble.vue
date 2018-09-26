@@ -46,10 +46,12 @@ export default class Scramble extends Vue {
     private worker = new Worker();
 
     private mounted() {
+        EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
+
         this.worker.onmessage = (event: MessageEvent) => { 
             switch (event.data.cmd) {
                 case 'init':
-                    EventHub.$on(Events.cubeState, this.onCubeState)
+                    EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
                     this.generateScrabmle()
                     break
                 case 'scramble':
@@ -70,7 +72,7 @@ export default class Scramble extends Vue {
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.scrambleAvailable()) {
+        if (!this.scrambleAvailable() || this.scrambleCompleted()) {
             return
         }
 

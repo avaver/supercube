@@ -10,9 +10,10 @@
         </v-toolbar>
 
         <v-content>
-            <v-container fluid fill-height>
-                <v-layout justify-center>
-                    <Scramble v-if="connected" />
+            <v-container fluid>
+                <v-layout justify-center column>
+                    <Scramble />
+                    <SolveTimer />
                 </v-layout>
             </v-container>
         </v-content>
@@ -44,11 +45,13 @@ import { EventHub, Events } from './classes/event-hub'
 import { Giiker } from './classes/giiker'
 import Device from './components/Device.vue'
 import Scramble from './components/Scramble.vue'
+import SolveTimer from './components/SolveTimer.vue'
 
 @Component({
     components: {
         Device,
-        Scramble
+        Scramble,
+        SolveTimer
     }
 })
 export default class App extends Vue {
