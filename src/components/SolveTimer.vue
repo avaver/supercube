@@ -1,7 +1,8 @@
 <template>
     <v-layout justify-start align-center column v-if="enabled">
         <v-flex xs12 sm6>
-            <div class="display-3 font-weight-bold">{{(time / 1000).toFixed(3)}}</div>
+            <div class="display-3 font-weight-bold" style="text-align: center">{{(time / 1000).toFixed(3)}}</div>
+            <div class="headline" style="text-align: center">{{turns}} turns | {{(turns / (time / 1000)).toFixed(2)}} TPS</div>
         </v-flex>
     </v-layout>
 </template>
@@ -15,6 +16,7 @@ import { Cube } from '@/classes/cube'
 export default class SolveTimer extends Vue {
     private enabled = false
     private time = 0.0
+    private turns = 0
 
     private startTime = 0
     private interval = 0
@@ -34,6 +36,7 @@ export default class SolveTimer extends Vue {
     private onCubeScrambled() {
         this.enabled = true
         this.time = 0.0
+        this.turns = 0
         this.startTime = 0
         this.interval = 0
     }
@@ -53,6 +56,7 @@ export default class SolveTimer extends Vue {
             return
         }
 
+        this.turns++
         const cube = Cube.from(state)
         if (cube.solved()) {
             this.time = Date.now() - this.startTime
@@ -63,7 +67,7 @@ export default class SolveTimer extends Vue {
     }
 
     private onTimer() {
-        this.time = (Date.now() - this.startTime) / 1000
+        this.time = Date.now() - this.startTime
     }
 }
 </script>
