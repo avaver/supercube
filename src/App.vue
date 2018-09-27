@@ -20,6 +20,7 @@
 
         <v-footer app fixed dark color="secondary">
             <v-layout justify-space-around>
+                <div><v-icon small color="accent">{{connected ? 'bluetooth_connected' : 'bluetooth_disabled'}}</v-icon> {{connected ? 'Connected [' + cubeName + ']' : 'Disconnected'}}</div>
                 <div class="hidden-sm-and-down">State: {{state}}</div>
                 <div><a href="mailto:avaver@gmail.com" class="subheading font-weight-light white--text">avaver@gmail.com</a></div>
             </v-layout>
@@ -61,6 +62,7 @@ export default class App extends Vue {
     private nobluetooth = false
 
     private connected = false
+    private cubeName = ''
 
     private snackbarTimeout = 3000
     private snackbarColor = 'info'
@@ -87,6 +89,7 @@ export default class App extends Vue {
 
     private onCubeConnect(name: string) {
         this.connected = true
+        this.cubeName = name
     }
 
     private onCubeDisconnect(name: string) {

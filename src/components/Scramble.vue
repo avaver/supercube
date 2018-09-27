@@ -46,28 +46,28 @@ export default class Scramble extends Vue {
     private worker = new Worker();
 
     private mounted() {
-        EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
-
         this.worker.onmessage = (event: MessageEvent) => { 
             switch (event.data.cmd) {
                 case 'init':
                     EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
+                    EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
                     this.generateScrabmle()
                     break
                 case 'scramble':
+                    this.scramble = []
+                    this.position = 0
                     event.data.scramble.split(' ').forEach((s: string) => this.scramble.push(s))
                     this.stopOperation()
                     break
             }
         }
-        this.worker.postMessage({ cmd: 'init'})
+
         this.startOperation('Initializing scrambler...')
+        this.worker.postMessage({ cmd: 'init'})
     }
 
     private generateScrabmle() {
         this.startOperation('Generating scramble...')
-        this.scramble = []
-        this.position = 0
         this.worker.postMessage({ cmd: 'scramble'})
     }
 
@@ -86,7 +86,7 @@ export default class Scramble extends Vue {
         if (eCube.asString() === aCube.vcs) {
             this.position++
             if (this.scrambleCompleted()) {
-                EventHub.$emit(Events.cubeScrambled)
+                EventHub.$emit(Events.cubeScrambled, this.scramble.join(' '))
             }
         }
     }

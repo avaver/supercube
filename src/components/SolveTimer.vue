@@ -1,7 +1,7 @@
 <template>
     <v-layout justify-start align-center column v-if="enabled">
         <v-flex xs12 sm6>
-            <div class="display-3 font-weight-bold">{{time.toFixed(3)}}</div>
+            <div class="display-3 font-weight-bold">{{(time / 1000).toFixed(3)}}</div>
         </v-flex>
     </v-layout>
 </template>
@@ -46,6 +46,7 @@ export default class SolveTimer extends Vue {
         if (!this.startTime) {
             this.startTime = Date.now()
             this.interval = window.setInterval(this.onTimer, 10)
+            EventHub.$emit(Events.solveStarted, this.startTime)
         }
 
         if (!this.interval) {
@@ -54,10 +55,10 @@ export default class SolveTimer extends Vue {
 
         const cube = Cube.from(state)
         if (cube.solved()) {
-            this.time = (Date.now() - this.startTime) / 1000
+            this.time = Date.now() - this.startTime
             window.clearInterval(this.interval)
             this.interval = 0
-            EventHub.$emit(Events.cubeSolved)
+            EventHub.$emit(Events.cubeSolved, this.time)
         }
     }
 
