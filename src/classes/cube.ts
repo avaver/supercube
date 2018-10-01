@@ -82,12 +82,12 @@ export class Cube {
 
     // possible solved crosses
     private scro = [
-        [[], [0x3, 0x6, 0x7, 0xb]], // white
-        [[], [0x2, 0x5, 0x6, 0xa]], // pink
-        [[], [0x9, 0xa, 0xb, 0xc]], // blue
-        [[], [0x4, 0x7, 0x8, 0xc]], // red
         [[], [0x1, 0x2, 0x3, 0x4]], // green
-        [[], [0x1, 0x5, 0x8, 0x9]]  // yellow
+        [[], [0x1, 0x5, 0x8, 0x9]], // yellow
+        [[], [0x2, 0x5, 0x6, 0xa]], // pink
+        [[], [0x3, 0x6, 0x7, 0xb]], // white
+        [[], [0x4, 0x7, 0x8, 0xc]], // red
+        [[], [0x9, 0xa, 0xb, 0xc]]  // blue
     ]
 
     // possible solved f2l's
@@ -145,6 +145,14 @@ export class Cube {
         this.calcvcs()
     }
 
+    public lastmove(): string {
+        // tslint:disable:no-bitwise
+        return (this.rs[16] & 0xf) === 3 ?
+        this.faces[(this.rs[16] >> 4) - 1] + '\'' :
+        this.faces[(this.rs[16] >> 4) - 1]
+        // tslint:enable:no-bitwise
+    }
+
     public solved(): boolean {
         for (let i = 0; i < 16; i++) {
             if (this.rss[i] !== this.rs[i]) {
@@ -155,8 +163,8 @@ export class Cube {
         return true
     }
 
-    public cross(): boolean {
-        return this.verify(this.scro) !== 0
+    public cross(): number {
+        return this.verify(this.scro)
     }
 
     public f2l(): boolean {

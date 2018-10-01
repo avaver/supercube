@@ -10,10 +10,11 @@
         </v-toolbar>
 
         <v-content>
-            <v-container fluid>
+            <v-container fluid grid-list-xl>
                 <v-layout justify-center column>
                     <Scramble />
                     <SolveTimer />
+                    <CFOP />
                 </v-layout>
             </v-container>
         </v-content>
@@ -42,17 +43,19 @@
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
-import { EventHub, Events } from './classes/event-hub'
-import { Giiker } from './classes/giiker'
-import Device from './components/Device.vue'
-import Scramble from './components/Scramble.vue'
-import SolveTimer from './components/SolveTimer.vue'
+import { EventHub, Events } from '@/classes/event-hub'
+import { Giiker } from '@/classes/giiker'
+import Device from '@/components/Device.vue'
+import Scramble from '@/components/Scramble.vue'
+import SolveTimer from '@/components/SolveTimer.vue'
+import CFOP from '@/components/CFOP.vue'
 
 @Component({
     components: {
         Device,
         Scramble,
-        SolveTimer
+        SolveTimer,
+        CFOP
     }
 })
 export default class App extends Vue {

@@ -1,6 +1,6 @@
 <template>
-    <v-layout justify-start align-center column>
-        <v-flex xs12 sm6>
+    <v-layout justify-start align-center column v-if="enabled">
+        <v-flex xs12>
             <v-card v-if="working">
                 <v-card-title>
                     <h3>{{operation}}</h3>
@@ -9,18 +9,26 @@
             </v-card>
             <v-card v-else>
                 <v-card-title class="headline">
-                    <v-btn flat icon color="primary" @click="generateScrabmle">
-                        <v-icon>refresh</v-icon>
-                    </v-btn>
-
-                    <span v-for="(move, index) in scramble" :key="index" :class="[{'grey--text': position > index}, 'pr-2', 'pl-2']">
-                        {{move}}
-                    </span>
-
-                    <v-icon class="ml-2 scramble_info" style="cursor: pointer" @click.native.stop="tooltip = !tooltip">info</v-icon>
-                    <v-tooltip bottom open-delay="0" v-model="tooltip" activator=".scramble_info">
-                        <span>U is WHITE and F is BLUE</span>
-                    </v-tooltip>
+                    <!--<v-checkbox v-model="simple" label="simple" @change="generateScrabmle"></v-checkbox>-->
+                    <v-layout row wrap align-center>
+                        <v-flex>
+                            <v-btn flat icon color="primary" @click="generateScrabmle">
+                                <v-icon>refresh</v-icon>
+                            </v-btn>
+                        </v-flex>
+                        <v-flex>
+                            <v-checkbox v-model="simple" @change="generateScrabmle" style="margin-top: 20px !important"></v-checkbox>
+                        </v-flex>
+                        <v-flex v-for="(move, index) in scramble" :key="index" :class="[{'grey--text': position > index}]">
+                            {{move}}
+                        </v-flex>
+                        <v-flex>
+                            <v-icon class="scramble_info" style="cursor: pointer; line-height: 28px!important" @click.native.stop="tooltip = !tooltip">info</v-icon>
+                            <v-tooltip bottom open-delay="0" v-model="tooltip" activator=".scramble_info">
+                                <span>U is WHITE and F is BLUE</span>
+                            </v-tooltip>
+                        </v-flex>
+                    </v-layout>
                 </v-card-title>
             </v-card>
         </v-flex>
@@ -36,8 +44,10 @@ import { Cube } from '@/classes/cube'
 
 @Component
 export default class Scramble extends Vue {
+    private enabled = true
     private working = false
     private tooltip = false
+    private simple = false
 
     private operation = ''
     private scramble: string[] = []
@@ -57,6 +67,9 @@ export default class Scramble extends Vue {
                     this.scramble = []
                     this.position = 0
                     event.data.scramble.split(' ').forEach((s: string) => this.scramble.push(s))
+                    if (this.simple) {
+                        this.scramble = this.scramble.slice(0, Math.floor(this.scramble.length / 2))
+                    }
                     this.stopOperation()
                     break
             }
@@ -67,6 +80,7 @@ export default class Scramble extends Vue {
     }
 
     private generateScrabmle() {
+        this.enabled = true
         this.startOperation('Generating scramble...')
         this.worker.postMessage({ cmd: 'scramble'})
     }
@@ -87,6 +101,7 @@ export default class Scramble extends Vue {
             this.position++
             if (this.scrambleCompleted()) {
                 EventHub.$emit(Events.cubeScrambled, this.scramble.join(' '))
+                this.enabled = false
             }
         }
     }
