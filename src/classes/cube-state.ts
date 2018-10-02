@@ -1,0 +1,123 @@
+// tslint:disable-next-line:max-line-length
+import { RawSolvedState, SolvedColorState, ColorID,
+    Corners, Edges, CornerColors, EdgeColors, Colors, Faces,
+    Cross } from '@/classes/cube-state-data'
+
+export default class CubeState {
+    public static from(state: Uint8Array) {
+        if (state.length !== 20) {
+            throw new Error('raw cube state should be exactly 20 bytes')
+        }
+
+        return new CubeState(state)
+    }
+
+    // current raw cube state
+    public rawState = RawSolvedState
+
+    // color cube state in format 'W...WR...RG...GP...PB...BY...Y'
+    public colorState = ''
+
+    // visual cube state in format 'U...UR...RF...FD...DL...LB...B'
+    public visualState = ''
+
+    public cross = ''
+
+    private cp: Uint8Array = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8])
+    private co: Uint8Array = Uint8Array.from([3, 3, 3, 3, 3, 3, 3, 3])
+    private eo: Uint8Array = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    private ep: Uint8Array = Uint8Array.from([0, 0, 0, 0, 0, 0, 0, 0, 0,  0,  0,  0])
+
+    private colorStateArray = new Uint8Array(54)
+    private visualStateArray: string[] = []
+
+    private constructor(state: Uint8Array) {
+        this.rawState = state
+        this.cp = this.rawState.splitBytes(0, 4)
+        this.co = this.rawState.splitBytes(4, 4)
+        this.ep = this.rawState.splitBytes(8, 6)
+        this.eo = this.rawState.splitBits(14, 2).slice(0, 12)
+
+        this.normalizeCO()
+        this.setupCenters()
+
+        this.computeColorState()
+        this.computeVisualState()
+
+        this.checkCross()
+    }
+
+    public checkCross() {
+        for (let i = 0; i < Cross.length; i++) {
+            let match = true
+            for (const index of Cross[i]) {
+                if (this.colorStateArray[index] !== SolvedColorState[index]) {
+                    match = false
+                    break
+                }
+            }
+
+            if (match) {
+                this.cross = Colors[i]
+                return
+            }
+        }
+
+        this.cross = ''
+    }
+
+    // magic: some corners seems to have swapped orientation when not in solved state
+    private normalizeCO() {
+        [0, 2, 5, 7].forEach((i) => {
+            if (this.co[i] !== 3) {
+                this.co[i] = this.co[i] === 1 ? 2 : 1
+            }
+        })
+    }
+
+    private setupCenters(): void {
+        this.colorStateArray[4]  = ColorID.WHI
+        this.colorStateArray[13] = ColorID.RED
+        this.colorStateArray[22] = ColorID.GRE
+        this.colorStateArray[31] = ColorID.PIN
+        this.colorStateArray[40] = ColorID.BLU
+        this.colorStateArray[49] = ColorID.YEL
+    }
+
+    private computeColorState() {
+        for (let cornerSlot = 0; cornerSlot < Corners.length; cornerSlot++) {
+            const cornerIndices = Corners[cornerSlot]
+            for (let cornerFace = 0; cornerFace < cornerIndices.length; cornerFace++) {
+                const index = cornerIndices[cornerFace]
+                const cornerColorSchema = CornerColors[this.cp[cornerSlot] - 1]
+                const cornerColorIndex = (this.co[cornerSlot] + cornerFace) % 3
+                this.colorStateArray[index] = cornerColorSchema[cornerColorIndex]
+            }
+        }
+
+        for (let edgeSlot = 0; edgeSlot < Edges.length; edgeSlot++) {
+            const edgeIndices = Edges[edgeSlot]
+            for (let edgeFace = 0; edgeFace < edgeIndices.length; edgeFace++) {
+                const index = edgeIndices[edgeFace]
+                const edgeColorSchema = EdgeColors[this.ep[edgeSlot] - 1]
+                const edgeColorIndex = (this.eo[edgeSlot] + edgeFace) % 2
+                this.colorStateArray[index] = edgeColorSchema[edgeColorIndex]
+            }
+        }
+
+        this.colorState = ''
+        this.colorStateArray.forEach((colorCode) => this.colorState += Colors[colorCode - 1])
+    }
+
+    private computeVisualState() {
+        this.visualStateArray = []
+        for (let i =  0; i <  9; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+        for (let i = 27; i < 36; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+        for (let i = 18; i < 27; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+        for (let i = 45; i < 54; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+        for (let i =  9; i < 18; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+        for (let i = 36; i < 45; i++) { this.visualStateArray.push(Faces[this.colorStateArray[i] - 1]) }
+
+        this.visualState = this.visualStateArray.join('')
+    }
+}

@@ -37,11 +37,6 @@
                 <v-card color="cyan" dark ripple>
                     <v-card-title class="display-2">
                         OLL
-                        <v-spacer />
-                        <v-chip color="white">
-                            <v-avatar color="yellow" class="font-weight-bold white--text">Dot</v-avatar>
-                            <span>shape</span>
-                        </v-chip>
                     </v-card-title>
                     <v-card-text>
                         <v-layout row wrap align-center>
@@ -56,11 +51,6 @@
                 <v-card color="deep-purple" dark ripple>
                     <v-card-title class="display-2">
                         PLL
-                        <v-spacer />
-                        <v-chip color="white">
-                            <v-avatar color="deep-orange" class="font-weight-bold white--text">Gc</v-avatar>
-                            <span>perm</span>
-                        </v-chip>
                     </v-card-title>
                     <v-card-text>
                         <v-layout row wrap align-center>

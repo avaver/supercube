@@ -16,9 +16,6 @@
                                 <v-icon>refresh</v-icon>
                             </v-btn>
                         </v-flex>
-                        <v-flex>
-                            <v-checkbox v-model="simple" @change="generateScrabmle" style="margin-top: 20px !important"></v-checkbox>
-                        </v-flex>
                         <v-flex v-for="(move, index) in scramble" :key="index" :class="[{'grey--text': position > index}]">
                             {{move}}
                         </v-flex>
@@ -41,78 +38,93 @@ import { EventHub, Events } from '@/classes/event-hub'
 import Worker from 'worker-loader!@/classes/cubejs.worker'
 import * as Cubejs from 'cubejs'
 import { Cube } from '@/classes/cube'
+import CubeState from '@/classes/cube-state'
 
 @Component
 export default class Scramble extends Vue {
     private enabled = true
-    private working = false
+    private working = true
     private tooltip = false
-    private simple = false
 
-    private operation = ''
+    private operation = 'Initializing scrambler...'
     private scramble: string[] = []
     private position = 0
 
-    private worker = new Worker();
+    private solveTrigger = ['R', 'R\'']
+    private triggerBuffer: string[] = []
+
+    private worker = new Worker()
 
     private mounted() {
+        EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
+        EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
+
         this.worker.onmessage = (event: MessageEvent) => { 
             switch (event.data.cmd) {
                 case 'init':
-                    EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
-                    EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
                     this.generateScrabmle()
                     break
                 case 'scramble':
-                    this.scramble = []
-                    this.position = 0
-                    event.data.scramble.split(' ').forEach((s: string) => this.scramble.push(s))
-                    if (this.simple) {
-                        this.scramble = this.scramble.slice(0, Math.floor(this.scramble.length / 2))
-                    }
-                    this.stopOperation()
+                    this.onScrambleGenerated(event.data.scramble)
                     break
             }
         }
 
-        this.startOperation('Initializing scrambler...')
         this.worker.postMessage({ cmd: 'init'})
+    }
+
+    private onCubeState(state: Uint8Array) {
+        const cube = Cube.from(state)
+        const cubeState = CubeState.from(state)
+        console.log(cubeState.cross)
+
+        if (this.enabled) {
+            if (cube.lastmove() === this.solveTrigger[this.triggerBuffer.length]) {
+                this.triggerBuffer.push(cube.lastmove())
+                if (this.solveTrigger.join('') === this.triggerBuffer.join('')) {
+                    this.triggerBuffer = []
+                    this.onScrambleCompleted()
+                }
+            } else {
+                this.triggerBuffer = []
+            }
+
+            if (!this.scrambleAvailable() || this.scrambleCompleted()) {
+                return
+            }
+        }
+
+        const a = this.scramble.slice(0, this.position + 1)
+        // TODO: fix Cubejs ugly typings
+        const eCube: Cubejs = Cubejs.random()
+        eCube.identity()
+        eCube.move(a.join(' '))
+
+        if (eCube.asString() === cube.vcs) {
+            this.position++
+            if (this.scrambleCompleted()) {
+                this.onScrambleCompleted()
+            }
+        }
+    }
+
+    private onScrambleGenerated(scramble: string) {
+        this.working = false
+        this.scramble = []
+        this.position = 0
+        scramble.split(' ').forEach((s: string) => this.scramble.push(s))
+    }
+
+    private onScrambleCompleted() {
+        EventHub.$emit(Events.cubeScrambled, this.scramble.join(' '))
+        this.enabled = false
     }
 
     private generateScrabmle() {
         this.enabled = true
-        this.startOperation('Generating scramble...')
-        this.worker.postMessage({ cmd: 'scramble'})
-    }
-
-    private onCubeState(state: Uint8Array) {
-        if (!this.scrambleAvailable() || this.scrambleCompleted()) {
-            return
-        }
-
-        const a = this.scramble.slice(0, this.position + 1)
-        const eCube: Cubejs = Cubejs.random()
-        const aCube = new Cube()
-        eCube.identity()
-        eCube.move(a.join(' '))
-        aCube.set(state)
-
-        if (eCube.asString() === aCube.vcs) {
-            this.position++
-            if (this.scrambleCompleted()) {
-                EventHub.$emit(Events.cubeScrambled, this.scramble.join(' '))
-                this.enabled = false
-            }
-        }
-    }
-
-    private startOperation(message: string) {
-        this.operation = message
+        this.operation = 'Generating scramble...'
         this.working = true
-    }
-
-    private stopOperation() {
-        this.working = false
+        this.worker.postMessage({ cmd: 'scramble'})
     }
 
     private scrambleAvailable() {
