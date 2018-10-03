@@ -1,7 +1,6 @@
 // tslint:disable-next-line:max-line-length
-import { RawSolvedState, SolvedColorState, ColorID,
-    Corners, Edges, CornerColors, EdgeColors, Colors, Faces,
-    Cross } from '@/classes/cube-state-data'
+import { RawSolvedState, ColorID, Corners, Edges, CornerColors, EdgeColors, Colors, Faces } from '@/classes/cube-state-data'
+import CubeStateAnalyzer from '@/classes/cube-state-analyzer'
 
 export default class CubeState {
     public static from(state: Uint8Array) {
@@ -21,8 +20,6 @@ export default class CubeState {
     // visual cube state in format 'U...UR...RF...FD...DL...LB...B'
     public visualState = ''
 
-    public cross = ''
-
     private cp: Uint8Array = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8])
     private co: Uint8Array = Uint8Array.from([3, 3, 3, 3, 3, 3, 3, 3])
     private eo: Uint8Array = Uint8Array.from([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
@@ -30,6 +27,8 @@ export default class CubeState {
 
     private colorStateArray = new Uint8Array(54)
     private visualStateArray: string[] = []
+
+    private analyzer: CubeStateAnalyzer
 
     private constructor(state: Uint8Array) {
         this.rawState = state
@@ -44,26 +43,15 @@ export default class CubeState {
         this.computeColorState()
         this.computeVisualState()
 
-        this.checkCross()
+        this.analyzer = new CubeStateAnalyzer(this.colorStateArray)
     }
 
-    public checkCross() {
-        for (let i = 0; i < Cross.length; i++) {
-            let match = true
-            for (const index of Cross[i]) {
-                if (this.colorStateArray[index] !== SolvedColorState[index]) {
-                    match = false
-                    break
-                }
-            }
+    public cross() {
+        return this.analyzer.getSolvedCrossColor()
+    }
 
-            if (match) {
-                this.cross = Colors[i]
-                return
-            }
-        }
-
-        this.cross = ''
+    public f2l(cross: string): string[] {
+        return this.analyzer.getSolvedF2lsForCross(cross)
     }
 
     // magic: some corners seems to have swapped orientation when not in solved state

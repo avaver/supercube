@@ -154,10 +154,49 @@ export const SolvedColorState = [
 ]
 
 export const Cross = [
-    [37, 39, 41, 43, 1, 32, 12, 52],
-    [46, 48, 50, 52, 25, 16, 34, 43],
-    [10, 12, 14, 16, 3, 41, 21, 48],
-    [1, 3, 5, 7, 37, 10, 28, 19],
-    [28, 30, 32, 34, 5, 23, 39, 50],
-    [19, 21, 23, 25, 7, 14, 30, 46]
+    [...Edges[8], ...Edges[9], ...Edges[10], ...Edges[11]], // E9 E10 E11 E12  |  blue cross
+    [...Edges[0], ...Edges[4], ...Edges[7],  ...Edges[8] ], // E1 E5  E8  E9   |  yellow cross
+    [...Edges[3], ...Edges[6], ...Edges[7],  ...Edges[11]], // E4 E7  E8  E12  |  red cross
+    [...Edges[2], ...Edges[5], ...Edges[6],  ...Edges[10]], // E3 E6  E7  E11  |  white cross
+    [...Edges[1], ...Edges[4], ...Edges[5],  ...Edges[9] ], // E2 E5  E6  E10  |  pink cross
+    [...Edges[0], ...Edges[1], ...Edges[2],  ...Edges[3] ]  // E1 E2  E3  E4   |  green cross
+]
+
+export const F2L = [
+    [
+        [...Corners[4], ...Edges[4] ], // C5 E5
+        [...Corners[5], ...Edges[5] ], // C6 E6
+        [...Corners[6], ...Edges[6] ], // C7 E7
+        [...Corners[7], ...Edges[7] ]  // C8 E8
+    ],  // blue cross
+    [
+        [...Corners[0], ...Edges[1] ], // C1 E2
+        [...Corners[3], ...Edges[3] ], // C4 E4
+        [...Corners[4], ...Edges[9] ], // C5 E10
+        [...Corners[7], ...Edges[11]]  // C8 E12
+    ], // yellow cross
+    [
+        [...Corners[2], ...Edges[2] ], // C3 E3
+        [...Corners[3], ...Edges[0] ], // C4 E1
+        [...Corners[6], ...Edges[10]], // C7 E11
+        [...Corners[7], ...Edges[8] ]  // C8 E9
+    ], // red cross
+    [
+        [...Corners[1], ...Edges[1] ], // C2 E2
+        [...Corners[2], ...Edges[3] ], // C3 E4
+        [...Corners[5], ...Edges[9] ], // C6 E10
+        [...Corners[6], ...Edges[11]]  // C7 E12
+    ], // white cross
+    [
+        [...Corners[0], ...Edges[0] ], // C1 E1
+        [...Corners[1], ...Edges[2] ], // C2 E3
+        [...Corners[4], ...Edges[8] ], // C5 E9
+        [...Corners[5], ...Edges[10]]  // C6 E11
+    ], // pink cross
+    [
+        [...Corners[0], ...Edges[4] ], // C1 E5
+        [...Corners[1], ...Edges[5] ], // C2 E6
+        [...Corners[2], ...Edges[6] ], // C3 E7
+        [...Corners[3], ...Edges[7] ]  // C4 E8
+    ]  // green cross
 ]

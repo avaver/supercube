@@ -76,7 +76,10 @@ export default class Scramble extends Vue {
     private onCubeState(state: Uint8Array) {
         const cube = Cube.from(state)
         const cubeState = CubeState.from(state)
-        console.log(cubeState.cross)
+        const cross = cubeState.cross()
+        if (cross) {
+            console.log('cross: ' + cross + ' | f2l: ' + cubeState.f2l(cross).join(' '))
+        }
 
         if (this.enabled) {
             if (cube.lastmove() === this.solveTrigger[this.triggerBuffer.length]) {
