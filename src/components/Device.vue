@@ -87,12 +87,16 @@ export default class Device extends Vue {
             }
         })
     }
-    
+
     private async doWithLoading(func: () => void) {
         this.loading = true
-        try { await func() } 
-        catch (e) { EventHub.$emit(Events.error, e) } 
-        finally { this.loading = false }
+        try {
+            await func()
+        } catch (e) {
+            EventHub.$emit(Events.error, e)
+        } finally {
+            this.loading = false
+        }
     }
 
     private onState(state: Uint8Array) {

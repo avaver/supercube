@@ -72,9 +72,17 @@ export enum ColorID {
     GRE = 6
 }
 
+export const ColorIDs = [ColorID.BLU, ColorID.YEL, ColorID.RED, ColorID.WHI, ColorID.PIN, ColorID.GRE]
+
+export const OppositeColorIDs = [ColorID.GRE, ColorID.WHI, ColorID.PIN, ColorID.YEL, ColorID.RED, ColorID.BLU]
+
 export const Colors = ['B', 'Y', 'R', 'W', 'P', 'G']
 
+export const OppositeColors = ['G', 'W', 'P', 'Y', 'R', 'B']
+
 export const Faces  = ['B', 'D', 'L', 'U', 'R', 'F']
+
+export const OppositeFaces  = ['F', 'U', 'R', 'D', 'L', 'B']
 
 // corner cubies colors in ccw direction
 export const CornerColors = [
@@ -199,4 +207,22 @@ export const F2L = [
         [...Corners[2], ...Edges[6] ], // C3 E7
         [...Corners[3], ...Edges[7] ]  // C4 E8
     ]  // green cross
+]
+
+export const OLL = [
+    [18, 19, 20, 21, 22, 23, 24, 25, 26], // blue cross   -> green OLL
+    [ 0,  1,  2,  3,  4,  5,  6,  7,  8], // yellow cross -> white OLL
+    [27, 28, 29, 30, 31, 32, 33, 34, 35], // red cross    -> pink OLL
+    [45, 46, 47, 48, 49, 50, 51, 52, 53], // white cross  -> yellow OLL
+    [ 9, 10, 11, 12, 13, 14, 15, 16, 17], // pink cross   -> red OLL
+    [36, 37, 38, 39, 40, 41, 42, 43, 44]  // green cross  -> blue OLL
+]
+
+export const PLL = [
+    [ 6,  7,  8, 11, 14, 17, 27, 30, 33, 45, 46, 47], // blue cross
+    [ 9, 10, 11, 18, 19, 20, 27, 28, 29, 36, 37, 38], // yellow cross
+    [ 2,  5,  8, 20, 23, 26, 36, 39, 42, 47, 50, 53], // red cross
+    [15, 16, 17, 24, 25, 26, 33, 34, 35, 42, 43, 44], // white cross
+    [ 0,  3,  6, 18, 21, 24, 38, 41, 44, 45, 48, 51], // pink cross
+    [ 0,  1,  2,  9, 12, 15, 29, 32, 35, 51, 52, 53]  // green cross
 ]

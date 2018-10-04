@@ -1,4 +1,4 @@
-import { Cross, SolvedColorState, Colors, F2L, Corners, CornerColors } from '@/classes/cube-state-data'
+import { Cross, SolvedColorState, Colors, F2L, Corners, CornerColors, OLL, PLL } from '@/classes/cube-state-data'
 
 export default class CubeStateAnalyzer {
     private colorStateArray: Uint8Array
@@ -17,9 +17,7 @@ export default class CubeStateAnalyzer {
                 }
             }
 
-            if (match) {
-                return Colors[i]
-            }
+            if (match) { return Colors[i] }
         }
 
         return ''
@@ -27,9 +25,7 @@ export default class CubeStateAnalyzer {
 
     public getSolvedF2lsForCross(cross: string): string[] {
         const crossColor = Colors.indexOf(cross)
-        if (crossColor < 0) {
-            return []
-        }
+        if (crossColor < 0) { return [] }
 
         const f2ls = F2L[crossColor]
         const solved: string[] = []
@@ -50,5 +46,31 @@ export default class CubeStateAnalyzer {
         }
 
         return solved
+    }
+
+    public isOllSolvedForCross(cross: string): boolean {
+        const crossColor = Colors.indexOf(cross)
+        if (crossColor < 0) { return false }
+
+        for (const index of OLL[crossColor]) {
+            if (this.colorStateArray[index] !== SolvedColorState[index]) { return false }
+        }
+
+        return true
+    }
+
+    public isPllSolvedForCross(cross: string): boolean {
+        const crossColor = Colors.indexOf(cross)
+        if (crossColor < 0) { return false }
+
+        const pll = PLL[crossColor]
+        for (let i = 0; i < pll.length; i += 3) {
+            if ((this.colorStateArray[pll[i]] !== this.colorStateArray[pll[i + 1]]) ||
+                (this.colorStateArray[pll[i]] !== this.colorStateArray[pll[i + 2]])) {
+                    return false
+                }
+        }
+
+        return true
     }
 }

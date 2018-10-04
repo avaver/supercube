@@ -9,10 +9,9 @@
             </v-card>
             <v-card v-else>
                 <v-card-title class="headline">
-                    <!--<v-checkbox v-model="simple" label="simple" @change="generateScrabmle"></v-checkbox>-->
                     <v-layout row wrap align-center>
                         <v-flex>
-                            <v-btn flat icon color="primary" @click="generateScrabmle">
+                            <v-btn flat icon color="primary" @click="generateScramble">
                                 <v-icon>refresh</v-icon>
                             </v-btn>
                         </v-flex>
@@ -22,7 +21,10 @@
                         <v-flex>
                             <v-icon class="scramble_info" style="cursor: pointer; line-height: 28px!important" @click.native.stop="tooltip = !tooltip">info</v-icon>
                             <v-tooltip bottom open-delay="0" v-model="tooltip" activator=".scramble_info">
-                                <span>U is WHITE and F is BLUE</span>
+                                <span class="subheading">
+                                    - <kbd>U</kbd> is <strong>white</strong> and <kbd>F</kbd> is <strong>green</strong><br/>
+                                    - <kbd>{{solveTrigger.join(' ')}}</kbd> to start solve without completing the scramble
+                                </span>
                             </v-tooltip>
                         </v-flex>
                     </v-layout>
@@ -35,10 +37,11 @@
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
 import { EventHub, Events } from '@/classes/event-hub'
+import Timer from '@/classes/timer'
 import Worker from 'worker-loader!@/classes/cubejs.worker'
-import * as Cubejs from 'cubejs'
-import { Cube } from '@/classes/cube'
 import CubeState from '@/classes/cube-state'
+// tslint:disable-next-line:no-var-requires
+const cubejs = require('cubejs')
 
 @Component
 export default class Scramble extends Vue {
@@ -57,12 +60,13 @@ export default class Scramble extends Vue {
 
     private mounted() {
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
-        EventHub.$on(Events.cubeSolved, () => this.generateScrabmle())
+        EventHub.$on(Events.cubeSolved, () => this.generateScramble())
+        EventHub.$on(Events.solveCancelled, () => this.generateScramble())
 
-        this.worker.onmessage = (event: MessageEvent) => { 
+        this.worker.onmessage = (event: MessageEvent) => {
             switch (event.data.cmd) {
                 case 'init':
-                    this.generateScrabmle()
+                    this.generateScramble()
                     break
                 case 'scramble':
                     this.onScrambleGenerated(event.data.scramble)
@@ -74,36 +78,17 @@ export default class Scramble extends Vue {
     }
 
     private onCubeState(state: Uint8Array) {
-        const cube = Cube.from(state)
+        if (!this.enabled || !this.scrambleAvailable() || this.scrambleCompleted()) {
+            return
+        }
+
         const cubeState = CubeState.from(state)
-        const cross = cubeState.cross()
-        if (cross) {
-            console.log('cross: ' + cross + ' | f2l: ' + cubeState.f2l(cross).join(' '))
-        }
+        this.checkTrigger(cubeState)
 
-        if (this.enabled) {
-            if (cube.lastmove() === this.solveTrigger[this.triggerBuffer.length]) {
-                this.triggerBuffer.push(cube.lastmove())
-                if (this.solveTrigger.join('') === this.triggerBuffer.join('')) {
-                    this.triggerBuffer = []
-                    this.onScrambleCompleted()
-                }
-            } else {
-                this.triggerBuffer = []
-            }
+        const expectedState: any = new cubejs()
+        expectedState.move(this.scramble.slice(0, this.position + 1).join(' '))
 
-            if (!this.scrambleAvailable() || this.scrambleCompleted()) {
-                return
-            }
-        }
-
-        const a = this.scramble.slice(0, this.position + 1)
-        // TODO: fix Cubejs ugly typings
-        const eCube: Cubejs = Cubejs.random()
-        eCube.identity()
-        eCube.move(a.join(' '))
-
-        if (eCube.asString() === cube.vcs) {
+        if (cubeState.visualState === expectedState.asString()) {
             this.position++
             if (this.scrambleCompleted()) {
                 this.onScrambleCompleted()
@@ -119,11 +104,12 @@ export default class Scramble extends Vue {
     }
 
     private onScrambleCompleted() {
-        EventHub.$emit(Events.cubeScrambled, this.scramble.join(' '))
+        Timer.cubeScrambled()
+        Vue.nextTick(() => EventHub.$emit(Events.cubeScrambled, this.scramble.join(' ')))
         this.enabled = false
     }
 
-    private generateScrabmle() {
+    private generateScramble() {
         this.enabled = true
         this.operation = 'Generating scramble...'
         this.working = true
@@ -131,11 +117,23 @@ export default class Scramble extends Vue {
     }
 
     private scrambleAvailable() {
-        return this.scramble.length > 0    
+        return this.scramble.length > 0
     }
 
     private scrambleCompleted() {
         return this.scramble.length > 0 && this.scramble.length === this.position
+    }
+
+    private checkTrigger(state: CubeState) {
+        if (state.lastmove() === this.solveTrigger[this.triggerBuffer.length]) {
+            this.triggerBuffer.push(state.lastmove())
+            if (this.solveTrigger.join('') === this.triggerBuffer.join('')) {
+                this.triggerBuffer = []
+                this.onScrambleCompleted()
+            }
+        } else {
+            this.triggerBuffer = []
+        }
     }
 }
 </script>

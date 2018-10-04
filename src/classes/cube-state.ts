@@ -11,6 +11,15 @@ export default class CubeState {
         return new CubeState(state)
     }
 
+    public static OptimizeMoves(moves: string[]): string[] {
+        const m: string[] = []
+        for (let i = 0; i < moves.length; i++) {
+            m.push((i < (moves.length - 1) && (moves[i] === moves[i + 1])) ? moves[i++][0] + '2' : moves[i])
+        }
+
+        return m
+    }
+
     // current raw cube state
     public rawState = RawSolvedState
 
@@ -46,12 +55,37 @@ export default class CubeState {
         this.analyzer = new CubeStateAnalyzer(this.colorStateArray)
     }
 
+    public lastmove(): string {
+        // tslint:disable:no-bitwise
+        const move = Faces[(this.rawState[16] >> 4) - 1]
+        return (this.rawState[16] & 0xf) === 3 ? move + '\'' : move
+        // tslint:enable:no-bitwise
+    }
+
     public cross() {
         return this.analyzer.getSolvedCrossColor()
     }
 
     public f2l(cross: string): string[] {
         return this.analyzer.getSolvedF2lsForCross(cross)
+    }
+
+    public oll(cross: string): boolean {
+        return this.analyzer.isOllSolvedForCross(cross)
+    }
+
+    public pll(cross: string): boolean {
+        return this.analyzer.isPllSolvedForCross(cross)
+    }
+
+    public solved(): boolean {
+        for (let i = 0; i < 16; i++) {
+            if (this.rawState[i] !== RawSolvedState[i]) {
+                return false
+            }
+        }
+
+        return true
     }
 
     // magic: some corners seems to have swapped orientation when not in solved state

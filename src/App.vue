@@ -14,7 +14,25 @@
                 <v-layout justify-center column>
                     <Scramble />
                     <SolveTimer />
-                    <CFOP />
+                    <v-container grid-list-xl>
+                        <v-layout row wrap>
+                            <v-flex xs12 md4>
+                                <Cross />
+                            </v-flex>
+                            <v-flex xs12 md4>
+                                <F2L />
+                            </v-flex>
+                            <v-flex xs12 md4>
+                                <OLL />
+                            </v-flex>
+                            <v-flex xs12 md4>
+                                <PLL />
+                            </v-flex>
+                            <v-flex xs12 md4>
+                                <AUF />
+                            </v-flex>
+                        </v-layout>
+                    </v-container>
                 </v-layout>
             </v-container>
         </v-content>
@@ -48,14 +66,22 @@ import { Giiker } from '@/classes/giiker'
 import Device from '@/components/Device.vue'
 import Scramble from '@/components/Scramble.vue'
 import SolveTimer from '@/components/SolveTimer.vue'
-import CFOP from '@/components/CFOP.vue'
+import Cross from '@/components/cfop/Cross.vue'
+import F2L from '@/components/cfop/F2L.vue'
+import OLL from '@/components/cfop/OLL.vue'
+import PLL from '@/components/cfop/PLL.vue'
+import AUF from '@/components/cfop/AUF.vue'
 
 @Component({
     components: {
         Device,
         Scramble,
         SolveTimer,
-        CFOP
+        Cross,
+        F2L,
+        OLL,
+        PLL,
+        AUF
     }
 })
 export default class App extends Vue {
@@ -73,7 +99,8 @@ export default class App extends Vue {
     private state = ''
 
     private mounted() {
-        if (this.nobluetooth = !Giiker.available()) return
+        this.nobluetooth = !Giiker.available()
+        if (this.nobluetooth) { return }
 
         EventHub.$on(Events.error, (e: Error) => this.onError(e))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
@@ -83,7 +110,8 @@ export default class App extends Vue {
 
     private onError(e: Error) {
         this.toast(e.toString(), 'error')
-        console.log(e)
+        // tslint:disable-next-line:no-console
+        console.log(e.toString())
     }
 
     private onCubeState(state: Uint8Array) {
