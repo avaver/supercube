@@ -1,23 +1,8 @@
 <template>
-    <v-card color="grey lighten-2" ripple>
+    <v-card color="blue-grey lighten-4" ripple class="card-auf">
         <v-card-title class="display-2">
-            AUF
+            AUF {{skipped ? '(skipped)' : ''}} {{moves.length ? ' | ' : ''}} <span class="headline pl-2">{{moves.join(' ')}}</span><v-spacer />{{((time) / 1000).toFixed(2)}}
         </v-card-title>
-        <v-card-text class="display-2 text-xs-center">
-            {{((time) / 1000).toFixed(2)}}
-        </v-card-text>
-        <v-card-title class="headline">
-            {{skipped ? '(skipped)' : ''}}
-            <v-spacer />
-            <v-btn icon @click.stop.prevent="details = !details">
-                <v-icon>{{ details ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
-            </v-btn>
-        </v-card-title>
-        <v-slide-y-transition>
-            <v-card-text v-show="details">
-                <v-card-text class="text-truncate">{{moves.join(' ')}}</v-card-text>
-            </v-card-text>
-        </v-slide-y-transition>
     </v-card>
 </template>
 
@@ -53,7 +38,7 @@ export default class AUF extends Vue {
     private onPLL(solved: boolean) {
         if (solved) {
             this.skipped = true
-            Timer.cubeSolved()
+            this.cubeSolved()
         } else {
             this.solving = true
             this.interval = window.setInterval(() => this.onTimer(), 10)
@@ -69,10 +54,15 @@ export default class AUF extends Vue {
         this.moves = CubeState.OptimizeMoves([...this.moves, cubeState.lastmove()])
 
         if (cubeState.solved()) {
-            Timer.cubeSolved()
+            this.cubeSolved()
             this.stopSolve()
             this.time = Timer.getAUFTime()
         }
+    }
+
+    private cubeSolved() {
+        Timer.cubeSolved()
+        EventHub.$emit(Events.cubeSolved)
     }
 
     private stopSolve() {

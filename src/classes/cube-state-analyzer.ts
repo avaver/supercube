@@ -61,7 +61,7 @@ export default class CubeStateAnalyzer {
 
     public isPllSolvedForCross(cross: string): boolean {
         const crossColor = Colors.indexOf(cross)
-        if (crossColor < 0) { return false }
+        if (crossColor < 0 || this.getSolvedF2lsForCross(cross).length !== 4) { return false }
 
         const pll = PLL[crossColor]
         for (let i = 0; i < pll.length; i += 3) {

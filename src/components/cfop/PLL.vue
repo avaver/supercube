@@ -1,5 +1,5 @@
 <template>
-    <v-card color="deep-purple" dark ripple>
+    <v-card color="blue-grey darken-4" dark ripple class="card-pll">
         <v-card-title class="display-2">
             PLL
         </v-card-title>

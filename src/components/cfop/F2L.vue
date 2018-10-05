@@ -1,5 +1,5 @@
 <template>
-    <v-card color="indigo" dark ripple>
+    <v-card color="blue-grey darken-2" dark ripple class="card-f2l">
         <v-card-title class="display-2">
             F2L
         </v-card-title>

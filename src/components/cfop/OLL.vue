@@ -1,5 +1,5 @@
 <template>
-    <v-card color="cyan" dark ripple>
+    <v-card color="blue-grey darken-3" dark ripple class="card-oll">
         <v-card-title class="display-2">
             OLL
         </v-card-title>

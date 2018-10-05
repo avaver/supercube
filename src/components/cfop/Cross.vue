@@ -1,5 +1,5 @@
 <template>
-    <v-card color="teal" dark ripple>
+    <v-card color="blue-grey darken-1" dark ripple class="card-cross">
         <v-card-title class="display-2">
             Cross
             <v-spacer />
@@ -9,10 +9,9 @@
             </v-chip>
         </v-card-title>
         <v-card-text class="display-2 text-xs-center">
-            {{(solveTime / 1000).toFixed(2)}}
+            {{(time / 1000).toFixed(2)}}
         </v-card-text>
         <v-card-title class="headline">
-            inspection: {{(inspectionTime / 1000).toFixed(2)}}
             <v-spacer />
             <v-btn icon @click.stop.prevent="details = !details">
                 <v-icon>{{ details ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
@@ -39,8 +38,7 @@ export default class Cross extends Vue {
     private inspection = true
 
     private interval = 0
-    private inspectionTime = 0
-    private solveTime = 0
+    private time = 0
 
     private cross = ''
     private moves: string[] = []
@@ -61,10 +59,11 @@ export default class Cross extends Vue {
     }
 
     private onCubeScrambled() {
-        this.solveTime = this.inspectionTime = 0
+        this.time = 0
         this.cross = ''
         this.moves = []
         this.solving = true
+        this.inspection = true
         this.interval = window.setInterval(() => this.onTimer(), 10)
     }
 
@@ -85,14 +84,13 @@ export default class Cross extends Vue {
         if (this.cross) {
             Timer.crossSolved()
             this.stopSolve()
-            this.solveTime = Timer.getCrossSolveTime()
+            this.time = Timer.getCrossSolveTime()
             Vue.nextTick(() => EventHub.$emit(Events.cfopCross, this.cross))
         }
     }
 
     private onTimer() {
-        this.inspectionTime = Timer.getInspectionTime()
-        this.solveTime = Timer.getCrossSolveTime()
+        this.time = Timer.getCrossSolveTime()
     }
 
     private stopSolve() {

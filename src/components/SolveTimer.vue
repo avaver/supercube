@@ -49,10 +49,10 @@ export default class SolveTimer extends Vue {
     private onCubeScrambled() {
         this.time = 0
         this.turns = 0
+        this.solving = true
     }
 
     private onSolveStarted() {
-        this.solving = true
         this.interval = window.setInterval(() => this.onTimer(), 10)
     }
 

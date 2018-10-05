@@ -16,19 +16,22 @@
                     <SolveTimer />
                     <v-container grid-list-xl>
                         <v-layout row wrap>
-                            <v-flex xs12 md4>
+                            <v-flex xs12>
+                                <Inspection />
+                            </v-flex>
+                            <v-flex xs12 sm6 md3>
                                 <Cross />
                             </v-flex>
-                            <v-flex xs12 md4>
+                            <v-flex xs12 sm6 md3>
                                 <F2L />
                             </v-flex>
-                            <v-flex xs12 md4>
+                            <v-flex xs12 sm6 md3>
                                 <OLL />
                             </v-flex>
-                            <v-flex xs12 md4>
+                            <v-flex xs12 sm6 md3>
                                 <PLL />
                             </v-flex>
-                            <v-flex xs12 md4>
+                            <v-flex xs12>
                                 <AUF />
                             </v-flex>
                         </v-layout>
@@ -66,6 +69,7 @@ import { Giiker } from '@/classes/giiker'
 import Device from '@/components/Device.vue'
 import Scramble from '@/components/Scramble.vue'
 import SolveTimer from '@/components/SolveTimer.vue'
+import Inspection from '@/components/cfop/Inspection.vue'
 import Cross from '@/components/cfop/Cross.vue'
 import F2L from '@/components/cfop/F2L.vue'
 import OLL from '@/components/cfop/OLL.vue'
@@ -77,6 +81,7 @@ import AUF from '@/components/cfop/AUF.vue'
         Device,
         Scramble,
         SolveTimer,
+        Inspection,
         Cross,
         F2L,
         OLL,
@@ -106,6 +111,14 @@ export default class App extends Vue {
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
         EventHub.$on(Events.cubeConnect, (name: string) => this.onCubeConnect(name))
         EventHub.$on(Events.cubeDisconnect, (name: string) => this.onCubeDisconnect(name))
+
+        EventHub.$on(Events.cubeScrambled, () => window.setTimeout(() => this.$vuetify.goTo('.card-inspection', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.solveStarted, () => window.setTimeout(() => this.$vuetify.goTo('.card-cross', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.cfopCross, () => window.setTimeout(() => this.$vuetify.goTo('.card-f2l', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.cfopF2l, () => window.setTimeout(() => this.$vuetify.goTo('.card-oll', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.cfopOll, () => window.setTimeout(() => this.$vuetify.goTo('.card-pll', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.cfopPll, (solved: boolean) => window.setTimeout(() => this.$vuetify.goTo(solved ? '.card-scramble' : '.card-auf', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        EventHub.$on(Events.cubeSolved, () => window.setTimeout(() => this.$vuetify.goTo('.card-scramble', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
     }
 
     private onError(e: Error) {
