@@ -19,16 +19,16 @@
                             <v-flex xs12>
                                 <Inspection />
                             </v-flex>
-                            <v-flex xs12 sm6 md3>
+                            <v-flex xs12 sm6 lg3>
                                 <Cross />
                             </v-flex>
-                            <v-flex xs12 sm6 md3>
+                            <v-flex xs12 sm6 lg3>
                                 <F2L />
                             </v-flex>
-                            <v-flex xs12 sm6 md3>
+                            <v-flex xs12 sm6 lg3>
                                 <OLL />
                             </v-flex>
-                            <v-flex xs12 sm6 md3>
+                            <v-flex xs12 sm6 lg3>
                                 <PLL />
                             </v-flex>
                             <v-flex xs12>

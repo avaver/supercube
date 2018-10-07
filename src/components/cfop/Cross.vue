@@ -12,16 +12,8 @@
             {{(time / 1000).toFixed(2)}}
         </v-card-text>
         <v-card-title class="headline">
-            <v-spacer />
-            <v-btn icon @click.stop.prevent="details = !details">
-                <v-icon>{{ details ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
-            </v-btn>
+            &nbsp;
         </v-card-title>
-        <v-slide-y-transition>
-            <v-card-text v-show="details">
-                <v-card-text class="text-truncate">{{moves.join(' ')}}</v-card-text>
-            </v-card-text>
-        </v-slide-y-transition>
     </v-card>
 </template>
 
@@ -33,7 +25,6 @@ import CubeState from '@/classes/cube-state'
 
 @Component
 export default class Cross extends Vue {
-    private details = false
     private solving = false
     private inspection = true
 
@@ -85,7 +76,7 @@ export default class Cross extends Vue {
             Timer.crossSolved()
             this.stopSolve()
             this.time = Timer.getCrossSolveTime()
-            Vue.nextTick(() => EventHub.$emit(Events.cfopCross, this.cross))
+            Vue.nextTick(() => EventHub.$emit(Events.cfopCross, this.cross, state))
         }
     }
 

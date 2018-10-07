@@ -1,23 +1,22 @@
 <template>
     <v-card color="blue-grey darken-2" dark ripple class="card-f2l">
         <v-card-title class="display-2">
-            F2L
+            F2L {{solving ? '#' + (pairs.length + 1) : ''}}
         </v-card-title>
         <v-card-text class="display-2 text-xs-center">
             {{((inspectionTime + solveTime) / 1000).toFixed(2)}}
         </v-card-text>
         <v-card-title class="headline">
-            {{(inspectionTime / 1000).toFixed(2)}} + {{(solveTime / 1000).toFixed(2)}}
+            <v-tooltip bottom>
+                <div slot="activator">{{(inspectionTime / 1000).toFixed(2)}}</div>
+                <span>Inspection time</span>
+            </v-tooltip>
             <v-spacer />
-            <v-btn icon @click.stop.prevent="details = !details">
-                <v-icon>{{ details ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+                <div slot="activator">{{(solveTime / 1000).toFixed(2)}}</div>
+                <span>Execution time</span>
+            </v-tooltip>
         </v-card-title>
-        <v-slide-y-transition>
-            <v-card-text v-show="details">
-                <v-card-text class="text-truncate">{{moves.join(' ')}}</v-card-text>
-            </v-card-text>
-        </v-slide-y-transition>
     </v-card>
 </template>
 
@@ -56,7 +55,7 @@ export default class F2L extends Vue {
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
         EventHub.$on(Events.solveCancelled, () => this.stopSolve())
-        EventHub.$on(Events.cfopCross, (crossColor: string) => this.onCross(crossColor))
+        EventHub.$on(Events.cfopCross, (crossColor: string, state: Uint8Array) => this.onCross(crossColor, state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
 
@@ -71,11 +70,42 @@ export default class F2L extends Vue {
         this.inspection = true
     }
 
-    private onCross(crossColor: string) {
+    private onCross(crossColor: string, state: Uint8Array) {
         this.cross = crossColor
         this.inspectionFace = oppositeFace(colorToFace(crossColor))
-        this.solving = true
-        this.interval = window.setInterval(() => this.onTimer(), 10)
+
+        const cubeState = CubeState.from(state)
+        const solvedPairs = cubeState.f2l(this.cross)
+        if (solvedPairs[0]) {
+            this.pairs.push(solvedPairs[0])
+            Timer.f2l1Started()
+            Timer.f2l1Solved()
+        }
+
+        if (solvedPairs[1]) {
+            this.pairs.push(solvedPairs[1])
+            Timer.f2l2Started()
+            Timer.f2l2Solved()
+        }
+
+        if (solvedPairs[2]) {
+            this.pairs.push(solvedPairs[2])
+            Timer.f2l3Started()
+            Timer.f2l3Solved()
+        }
+
+        if (solvedPairs[3]) {
+            this.pairs.push(solvedPairs[3])
+            Timer.f2l4Started()
+            Timer.f2l4Solved()
+        }
+
+        if (this.pairs.length === 4) {
+            EventHub.$emit(Events.cfopF2l, this.cross, state)
+        } else {
+            this.solving = true
+            this.interval = window.setInterval(() => this.onTimer(), 10)
+        }
     }
 
     private onCubeState(state: Uint8Array) {
@@ -122,7 +152,7 @@ export default class F2L extends Vue {
         if (this.pairs.length === 4) {
             this.stopSolve()
             this.solveTime = this.solveTime1 + this.solveTime2 + this.solveTime3 + this.solveTime4
-            Vue.nextTick(() => EventHub.$emit(Events.cfopF2l, this.cross))
+            Vue.nextTick(() => EventHub.$emit(Events.cfopF2l, this.cross, state))
         }
     }
 

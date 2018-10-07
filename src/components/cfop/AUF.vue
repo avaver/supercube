@@ -1,7 +1,7 @@
 <template>
     <v-card color="blue-grey lighten-4" ripple class="card-auf">
-        <v-card-title class="display-2">
-            AUF {{skipped ? '(skipped)' : ''}} {{moves.length ? ' | ' : ''}} <span class="headline pl-2">{{moves.join(' ')}}</span><v-spacer />{{((time) / 1000).toFixed(2)}}
+        <v-card-title class="display-2" @click.native="alert('click')">
+            AUF<v-spacer />{{skipped ? '---' : (time / 1000).toFixed(2)}}
         </v-card-title>
     </v-card>
 </template>
@@ -33,6 +33,7 @@ export default class AUF extends Vue {
     private onCubeScrambled() {
         this.time = 0
         this.moves = []
+        this.skipped = false
     }
 
     private onPLL(solved: boolean) {
