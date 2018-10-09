@@ -55,6 +55,7 @@ export default class Scramble extends Vue {
 
     private solveTrigger = ['R', 'R\'']
     private triggerBuffer: string[] = []
+    private lastMoveTimestamp = 0
 
     private worker = new Worker()
 
@@ -125,7 +126,8 @@ export default class Scramble extends Vue {
     }
 
     private checkTrigger(state: CubeState) {
-        if (state.lastmove() === this.solveTrigger[this.triggerBuffer.length]) {
+        if (state.lastmove() === this.solveTrigger[this.triggerBuffer.length] && 
+        (this.triggerBuffer.length === 0 || (Date.now() - this.lastMoveTimestamp < 200))) {
             this.triggerBuffer.push(state.lastmove())
             if (this.solveTrigger.join('') === this.triggerBuffer.join('')) {
                 this.triggerBuffer = []
@@ -134,6 +136,8 @@ export default class Scramble extends Vue {
         } else {
             this.triggerBuffer = []
         }
+
+        this.lastMoveTimestamp = Date.now()
     }
 }
 </script>

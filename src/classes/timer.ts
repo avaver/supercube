@@ -36,6 +36,7 @@ const Measurements = {
     solved: 'meas-solved'
 }
 
+// tslint:disable:no-console
 export default class Timer {
     public static cubeScrambled() {
         console.log('[' + (window.performance.now() / 1000).toFixed(3) + '] cube scrambled')
@@ -210,3 +211,4 @@ export default class Timer {
         return measurementTime || (markTime ? window.performance.now() - markTime : 0)
     }
 }
+// tslint:enable:no-console

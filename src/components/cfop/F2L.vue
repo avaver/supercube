@@ -1,7 +1,9 @@
 <template>
     <v-card color="blue-grey darken-2" dark ripple class="card-f2l">
         <v-card-title class="display-2">
-            F2L {{solving ? '#' + (pairs.length + 1) : ''}}
+            F2L
+            <v-spacer />
+            <v-avatar size="32" color="accent" class="font-weight-bold white--text body-1" v-if="solving">{{pairs.length + 1}}</v-avatar>
         </v-card-title>
         <v-card-text class="display-2 text-xs-center">
             {{((inspectionTime + solveTime) / 1000).toFixed(2)}}

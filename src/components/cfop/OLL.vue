@@ -7,17 +7,16 @@
             {{((inspectionTime + solveTime) / 1000).toFixed(2)}}
         </v-card-text>
         <v-card-title class="headline">
-            {{(inspectionTime / 1000).toFixed(2)}} + {{(solveTime / 1000).toFixed(2)}}
+            <v-tooltip bottom>
+                <div slot="activator">{{(inspectionTime / 1000).toFixed(2)}}</div>
+                <span>Inspection time</span>
+            </v-tooltip>
             <v-spacer />
-            <v-btn icon @click.stop.prevent="details = !details">
-                <v-icon>{{ details ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+                <div slot="activator">{{(solveTime / 1000).toFixed(2)}}</div>
+                <span>Execution time</span>
+            </v-tooltip>
         </v-card-title>
-        <v-slide-y-transition>
-            <v-card-text v-show="details">
-                <v-card-text class="text-truncate">{{moves.join(' ')}}</v-card-text>
-            </v-card-text>
-        </v-slide-y-transition>
     </v-card>
 </template>
 
@@ -47,7 +46,7 @@ export default class OLL extends Vue {
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
         EventHub.$on(Events.solveCancelled, () => this.stopSolve())
-        EventHub.$on(Events.cfopF2l, (crossColor: string) => this.onF2L(crossColor))
+        EventHub.$on(Events.cfopF2l, (crossColor: string, state: Uint8Array) => this.onF2L(crossColor, state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
 
@@ -57,9 +56,17 @@ export default class OLL extends Vue {
         this.inspection = true
     }
 
-    private onF2L(crossColor: string) {
+    private onF2L(crossColor: string, state: Uint8Array) {
         this.cross = crossColor
         this.inspectionFace = oppositeFace(colorToFace(crossColor))
+        
+        const cubeState = CubeState.from(state)
+        if (cubeState.oll(this.cross)) {
+            Timer.ollStarted()
+            Timer.ollSolved()
+            EventHub.$emit(Events.cfopOll, this.cross, state)
+        }
+
         this.solving = true
         this.interval = window.setInterval(() => this.onTimer(), 10)
     }
@@ -83,7 +90,7 @@ export default class OLL extends Vue {
             Timer.ollSolved()
             this.stopSolve()
             this.solveTime = Timer.getOllSolveTime()
-            Vue.nextTick(() => EventHub.$emit(Events.cfopOll, this.cross))
+            Vue.nextTick(() => EventHub.$emit(Events.cfopOll, this.cross, state))
         }
     }
 

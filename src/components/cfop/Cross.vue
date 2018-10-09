@@ -3,10 +3,7 @@
         <v-card-title class="display-2">
             Cross
             <v-spacer />
-            <v-chip color="white" text-color="black" v-if="cross">
-                <v-avatar :color="chip[cross].color" class="font-weight-bold white--text">{{cross}}</v-avatar>
-                <span>{{chip[cross].text}}</span>
-            </v-chip>
+            <v-avatar v-if="cross" size="32" :color="chip[cross].color" class="font-weight-bold white--text body-1">{{cross}}</v-avatar>            
         </v-card-title>
         <v-card-text class="display-2 text-xs-center">
             {{(time / 1000).toFixed(2)}}
@@ -36,9 +33,9 @@ export default class Cross extends Vue {
 
     private chip: {[key: string]: {color: string, text: string}} = {
         G: { color: 'green' , text: 'green'},
-        Y: { color: 'yellow', text: 'yellow' },
+        Y: { color: 'yellow darken-1', text: 'yellow' },
         P: { color: 'pink lighten-2', text: 'pink' },
-        W: { color: 'grey lighten-1', text: 'white' },
+        W: { color: 'black', text: 'white' },
         R: { color: 'red', text: 'red' },
         B: { color: 'blue', text: 'blue' }
     }

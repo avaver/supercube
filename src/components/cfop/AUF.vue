@@ -26,7 +26,7 @@ export default class AUF extends Vue {
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
         EventHub.$on(Events.solveCancelled, () => this.stopSolve())
-        EventHub.$on(Events.cfopPll, (solved: boolean) => this.onPLL(solved))
+        EventHub.$on(Events.cfopPll, (state: Uint8Array) => this.onPLL(state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
 
@@ -36,8 +36,8 @@ export default class AUF extends Vue {
         this.skipped = false
     }
 
-    private onPLL(solved: boolean) {
-        if (solved) {
+    private onPLL(state: Uint8Array) {
+        if (CubeState.from(state).solved()) {
             this.skipped = true
             this.cubeSolved()
         } else {
