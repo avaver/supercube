@@ -1,5 +1,5 @@
 <template>
-    <v-card color="blue-grey darken-1" dark ripple class="card-cross">
+    <v-card color="blue-grey darken-1" dark ripple class="card-cross" @click.native="details = true">
         <v-card-title class="display-2">
             Cross
             <v-spacer />
@@ -11,6 +11,11 @@
         <v-card-title class="headline">
             &nbsp;
         </v-card-title>
+        <v-bottom-sheet v-model="details">
+            <v-list>
+                <v-subheader>Open in</v-subheader>
+            </v-list>
+        </v-bottom-sheet>
     </v-card>
 </template>
 
@@ -25,6 +30,7 @@ export default class Cross extends Vue {
     private time = 0
     private active = false
     private inspection = false
+    private details = false
 
     private cross = ''
     private moves: string[] = []
