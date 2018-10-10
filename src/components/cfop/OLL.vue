@@ -29,11 +29,8 @@ import { colorToFace, oppositeFace } from '@/classes/cube-helper'
 
 @Component
 export default class OLL extends Vue {
-    private details = false
-    private solving = false
-    private inspection = true
-
-    private interval = 0
+    private active = false
+    private inspection = false
 
     private cross = ''
     private inspectionFace = ''
@@ -45,7 +42,7 @@ export default class OLL extends Vue {
 
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
-        EventHub.$on(Events.solveCancelled, () => this.stopSolve())
+        EventHub.$on(Events.solveCancelled, () => this.stop())
         EventHub.$on(Events.cfopF2l, (crossColor: string, state: Uint8Array) => this.onF2L(crossColor, state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
@@ -65,14 +62,14 @@ export default class OLL extends Vue {
             Timer.ollStarted()
             Timer.ollSolved()
             EventHub.$emit(Events.cfopOll, this.cross, state)
+        } else {
+            this.active = true
+            window.requestAnimationFrame(this.timer)
         }
-
-        this.solving = true
-        this.interval = window.setInterval(() => this.onTimer(), 10)
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.solving) {
+        if (!this.active) {
             return
         }
 
@@ -88,23 +85,22 @@ export default class OLL extends Vue {
 
         if (cubeState.oll(this.cross)) {
             Timer.ollSolved()
-            this.stopSolve()
+            this.stop()
             this.solveTime = Timer.getOllSolveTime()
             Vue.nextTick(() => EventHub.$emit(Events.cfopOll, this.cross, state))
         }
     }
 
-    private stopSolve() {
-        this.solving = false
-        if (this.interval) {
-            window.clearInterval(this.interval)
-            this.interval = 0
-        }
+    private stop() {
+        this.active = false
     }
 
-    private onTimer() {
+    private timer() {
         this.solveTime = Timer.getOllSolveTime()
         this.inspectionTime = Timer.getOllInspectionTime()
+        if (this.active) {
+            window.requestAnimationFrame(this.timer)
+        }
     }
 }
 </script>

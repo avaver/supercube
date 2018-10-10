@@ -4,7 +4,7 @@
             <v-flex class="display-4 font-weight-bold main_timer" style="text-align: center">
                 <span>{{(time / 1000).toFixed(3)}}</span>
                 <div class="cancel">
-                    <v-btn icon ripple @click="cancelSolve()" v-show="solving">
+                    <v-btn icon ripple @click="cancel()" v-show="active">
                         <v-icon large color="accent">cancel</v-icon>
                     </v-btn>
                 </div>
@@ -35,47 +35,42 @@ import CubeState from '@/classes/cube-state'
 export default class SolveTimer extends Vue {
     private time = 0
     private turns = 0
-
-    private interval = 0
-    private solving = false
+    private active = false
 
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
         EventHub.$on(Events.solveStarted, () => this.onSolveStarted())
-        EventHub.$on(Events.cubeSolved, () => this.stopTimer())
+        EventHub.$on(Events.cubeSolved, () => this.stop())
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
 
     private onCubeScrambled() {
-        this.time = 0
-        this.turns = 0
-        this.solving = true
+        this.time = this.turns = 0
+        this.active = true
     }
 
     private onSolveStarted() {
-        this.interval = window.setInterval(() => this.onTimer(), 10)
+        window.requestAnimationFrame(this.timer)
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.solving) { return }
-        this.turns++
+        this.turns = this.active ? this.turns + 1 : this.turns
     }
 
-    private onTimer() {
+    private timer() {
         this.time = Timer.getSolveTime()
+        if (this.active) {
+            window.requestAnimationFrame(this.timer)
+        }
     }
 
-    private cancelSolve() {
-        this.stopTimer()
+    private cancel() {
+        this.stop()
         EventHub.$emit(Events.solveCancelled)
     }
 
-    private stopTimer() {
-        if (this.interval) {
-            window.clearInterval(this.interval)
-            this.interval = 0
-        }
-        this.solving = false
+    private stop() {
+        this.active = false
     }
 }
 </script>

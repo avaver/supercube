@@ -22,11 +22,9 @@ import CubeState from '@/classes/cube-state'
 
 @Component
 export default class Cross extends Vue {
-    private solving = false
-    private inspection = true
-
-    private interval = 0
     private time = 0
+    private active = false
+    private inspection = false
 
     private cross = ''
     private moves: string[] = []
@@ -42,7 +40,7 @@ export default class Cross extends Vue {
 
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
-        EventHub.$on(Events.solveCancelled, () => this.stopSolve())
+        EventHub.$on(Events.solveCancelled, () => this.stop())
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
 
@@ -50,43 +48,51 @@ export default class Cross extends Vue {
         this.time = 0
         this.cross = ''
         this.moves = []
-        this.solving = true
-        this.inspection = true
-        this.interval = window.setInterval(() => this.onTimer(), 10)
+        this.active = this.inspection = true
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.solving) {
+        if (!this.active) {
             return
         }
 
         if (this.inspection) {
-            Timer.crossStarted()
-            EventHub.$emit(Events.solveStarted)
-            this.inspection = false
+            this.start()
         }
 
         const cubeState = CubeState.from(state)
         this.moves = CubeState.OptimizeMoves([...this.moves, cubeState.lastmove()])
         this.cross = cubeState.cross()
+
         if (this.cross) {
-            Timer.crossSolved()
-            this.stopSolve()
-            this.time = Timer.getCrossSolveTime()
-            Vue.nextTick(() => EventHub.$emit(Events.cfopCross, this.cross, state))
+            this.done(this.cross, state)
         }
     }
 
-    private onTimer() {
+    private timer() {
         this.time = Timer.getCrossSolveTime()
+        if (this.active && !this.inspection) {
+            window.requestAnimationFrame(this.timer)
+        }
     }
 
-    private stopSolve() {
-        this.solving = false
-        if (this.interval) {
-            window.clearInterval(this.interval)
-            this.interval = 0
-        }
+
+    private start() {
+        Timer.crossStarted()
+        this.inspection = false
+        window.requestAnimationFrame(this.timer)
+        EventHub.$emit(Events.solveStarted)
+    }
+
+    private done(cross: string, state: Uint8Array) {
+        this.stop()
+        Timer.crossSolved()
+        this.time = Timer.getCrossSolveTime()
+        Vue.nextTick(() => EventHub.$emit(Events.cfopCross, this.cross, state))
+    }
+
+    private stop() {
+        this.active = false
     }
 }
 </script>

@@ -3,7 +3,7 @@
         <v-card-title class="display-2">
             F2L
             <v-spacer />
-            <v-avatar size="32" color="accent" class="font-weight-bold white--text body-1" v-if="solving">{{pairs.length + 1}}</v-avatar>
+            <v-avatar size="32" color="accent" class="font-weight-bold white--text body-1" v-if="active">{{pairs.length + 1}}</v-avatar>
         </v-card-title>
         <v-card-text class="display-2 text-xs-center">
             {{((inspectionTime + solveTime) / 1000).toFixed(2)}}
@@ -32,10 +32,9 @@ import { colorToFace, oppositeFace } from '@/classes/cube-helper'
 @Component
 export default class F2L extends Vue {
     private details = false
-    private solving = false
-    private inspection = true
+    private active = false
+    private inspection = false
 
-    private interval = 0
     private pairs: string[] = []
 
     private cross = ''
@@ -56,7 +55,7 @@ export default class F2L extends Vue {
 
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
-        EventHub.$on(Events.solveCancelled, () => this.stopSolve())
+        EventHub.$on(Events.solveCancelled, () => this.stop())
         EventHub.$on(Events.cfopCross, (crossColor: string, state: Uint8Array) => this.onCross(crossColor, state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
@@ -69,7 +68,6 @@ export default class F2L extends Vue {
         this.solveTime4 = this.inspectionTime4 = 0
         this.moves = []
         this.pairs = []
-        this.inspection = true
     }
 
     private onCross(crossColor: string, state: Uint8Array) {
@@ -105,13 +103,13 @@ export default class F2L extends Vue {
         if (this.pairs.length === 4) {
             EventHub.$emit(Events.cfopF2l, this.cross, state)
         } else {
-            this.solving = true
-            this.interval = window.setInterval(() => this.onTimer(), 10)
+            this.active = this.inspection = true
+            window.requestAnimationFrame(this.timer)
         }
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.solving) {
+        if (!this.active) {
             return
         }
 
@@ -152,21 +150,17 @@ export default class F2L extends Vue {
         })
 
         if (this.pairs.length === 4) {
-            this.stopSolve()
+            this.stop()
             this.solveTime = this.solveTime1 + this.solveTime2 + this.solveTime3 + this.solveTime4
             Vue.nextTick(() => EventHub.$emit(Events.cfopF2l, this.cross, state))
         }
     }
 
-    private stopSolve() {
-        this.solving = false
-        if (this.interval) {
-            window.clearInterval(this.interval)
-            this.interval = 0
-        }
+    private stop() {
+        this.active = false
     }
 
-    private onTimer() {
+    private timer() {
         this.solveTime1 = Timer.getF2l1SolveTime()
         this.solveTime2 = Timer.getF2l2SolveTime()
         this.solveTime3 = Timer.getF2l3SolveTime()
@@ -178,6 +172,10 @@ export default class F2L extends Vue {
         this.inspectionTime3 = Timer.getF2l3InspectionTime()
         this.inspectionTime4 = Timer.getF2l4InspectionTime()
         this.inspectionTime = this.inspectionTime1 + this.inspectionTime2 + this.inspectionTime3 + this.inspectionTime4
+
+        if (this.active) {
+            window.requestAnimationFrame(this.timer)
+        }
     }
 }
 </script>

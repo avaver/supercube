@@ -29,11 +29,8 @@ import { colorToFace, oppositeFace } from '@/classes/cube-helper'
 
 @Component
 export default class PLL extends Vue {
-    private details = false
-    private solving = false
-    private inspection = true
-
-    private interval = 0
+    private active = false
+    private inspection = false
 
     private cross = ''
     private inspectionFace = ''
@@ -45,7 +42,7 @@ export default class PLL extends Vue {
 
     private mounted() {
         EventHub.$on(Events.cubeScrambled, () => this.onCubeScrambled())
-        EventHub.$on(Events.solveCancelled, () => this.stopSolve())
+        EventHub.$on(Events.solveCancelled, () => this.stop())
         EventHub.$on(Events.cfopOll, (crossColor: string, state: Uint8Array) => this.onOLL(crossColor, state))
         EventHub.$on(Events.cubeState, (state: Uint8Array) => this.onCubeState(state))
     }
@@ -65,14 +62,14 @@ export default class PLL extends Vue {
             Timer.pllStarted()
             Timer.pllSolved()
             EventHub.$emit(Events.cfopPll, state)
+        } else {
+            this.active = true
+            window.requestAnimationFrame(this.timer)
         }
-
-        this.solving = true
-        this.interval = window.setInterval(() => this.onTimer(), 10)
     }
 
     private onCubeState(state: Uint8Array) {
-        if (!this.solving) {
+        if (!this.active) {
             return
         }
 
@@ -88,23 +85,22 @@ export default class PLL extends Vue {
 
         if (cubeState.pll(this.cross)) {
             Timer.pllSolved()
-            this.stopSolve()
+            this.stop()
             this.solveTime = Timer.getPllSolveTime()
             Vue.nextTick(() => EventHub.$emit(Events.cfopPll, state))
         }
     }
 
-    private stopSolve() {
-        this.solving = false
-        if (this.interval) {
-            window.clearInterval(this.interval)
-            this.interval = 0
-        }
+    private stop() {
+        this.active = false
     }
 
-    private onTimer() {
+    private timer() {
         this.solveTime = Timer.getPllSolveTime()
         this.inspectionTime = Timer.getPllInspectionTime()
+        if (this.active) {
+            window.requestAnimationFrame(this.timer)
+        }
     }
 }
 </script>
