@@ -56,7 +56,7 @@ export default class OLL extends Vue {
     private onF2L(crossColor: string, state: Uint8Array) {
         this.cross = crossColor
         this.inspectionFace = oppositeFace(colorToFace(crossColor))
-        
+
         const cubeState = CubeState.from(state)
         if (cubeState.oll(this.cross)) {
             Timer.ollStarted()

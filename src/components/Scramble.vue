@@ -126,7 +126,7 @@ export default class Scramble extends Vue {
     }
 
     private checkTrigger(state: CubeState) {
-        if (state.lastmove() === this.solveTrigger[this.triggerBuffer.length] && 
+        if (state.lastmove() === this.solveTrigger[this.triggerBuffer.length] &&
         (this.triggerBuffer.length === 0 || (Date.now() - this.lastMoveTimestamp < 200))) {
             this.triggerBuffer.push(state.lastmove())
             if (this.solveTrigger.join('') === this.triggerBuffer.join('')) {

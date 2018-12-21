@@ -75,7 +75,7 @@ import F2L from '@/components/cfop/F2L.vue'
 import OLL from '@/components/cfop/OLL.vue'
 import PLL from '@/components/cfop/PLL.vue'
 import AUF from '@/components/cfop/AUF.vue'
-import CubeState from '@/classes/cube-state';
+import CubeState from '@/classes/cube-state'
 
 @Component({
     components: {
@@ -113,6 +113,7 @@ export default class App extends Vue {
         EventHub.$on(Events.cubeConnect, (name: string) => this.onCubeConnect(name))
         EventHub.$on(Events.cubeDisconnect, (name: string) => this.onCubeDisconnect(name))
 
+        // tslint:disable:max-line-length
         EventHub.$on(Events.cubeScrambled, () => window.setTimeout(() => this.$vuetify.goTo('.card-inspection', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
         EventHub.$on(Events.solveStarted, () => window.setTimeout(() => this.$vuetify.goTo('.card-cross', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
         EventHub.$on(Events.cfopCross, () => window.setTimeout(() => this.$vuetify.goTo('.card-f2l', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
@@ -120,6 +121,7 @@ export default class App extends Vue {
         EventHub.$on(Events.cfopOll, () => window.setTimeout(() => this.$vuetify.goTo('.card-pll', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
         EventHub.$on(Events.cfopPll, (state: Uint8Array) => window.setTimeout(() => this.$vuetify.goTo(CubeState.from(state).solved() ? '.card-scramble' : '.card-auf', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
         EventHub.$on(Events.cubeSolved, () => window.setTimeout(() => this.$vuetify.goTo('.card-scramble', { offset: -100, duration: 500, easing: 'easeInOutCubic' }), 100))
+        // tslint:enable:max-line-length
     }
 
     private onError(e: Error) {
