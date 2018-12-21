@@ -34,6 +34,9 @@
                             <v-flex xs12>
                                 <AUF />
                             </v-flex>
+                            <v-flex xs12>
+                                <Results />
+                            </v-flex>
                         </v-layout>
                     </v-container>
                 </v-layout>
@@ -69,6 +72,7 @@ import { Giiker } from '@/classes/giiker'
 import Device from '@/components/Device.vue'
 import Scramble from '@/components/Scramble.vue'
 import SolveTimer from '@/components/SolveTimer.vue'
+import Results from '@/components/Results.vue'
 import Inspection from '@/components/cfop/Inspection.vue'
 import Cross from '@/components/cfop/Cross.vue'
 import F2L from '@/components/cfop/F2L.vue'
@@ -83,6 +87,7 @@ import CubeState from '@/classes/cube-state'
         Scramble,
         SolveTimer,
         Inspection,
+        Results,
         Cross,
         F2L,
         OLL,
