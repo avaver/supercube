@@ -12,20 +12,24 @@
       <td class="text-xs-center">{{ props.item.pll.toFixed(2) }}</td>
       <td class="text-xs-center">{{ props.item.auf.toFixed(2) }}</td>
       <td class="text-xs-center">{{ props.item.turns }}</td>
-      <td class="text-xs-center">{{ props.item.tps.toFixed(2) }}</td>
+      <td class="text-xs-center">{{ props.item.tps }}</td>
+      <td class="text-xs-center">{{ props.item.time.toFixed(2) }}</td>
     </template>
   </v-data-table>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Prop } from 'vue-property-decorator'
 import { EventHub, Events } from '@/classes/event-hub'
 import Timer from '@/classes/timer'
+import GameState from '@/classes/game-state'
 
 @Component
 export default class Results extends Vue {
+    @Prop()
+    private game!: GameState
+
     private localStorageKey = 'results'
-    private scramble: string[] = []
 
     private headers = [
       {
@@ -40,13 +44,15 @@ export default class Results extends Vue {
       { text: 'PLL', value: 'pll', align: 'center' },
       { text: 'AUF', value: 'auf', align: 'center' },
       { text: 'Turns', value: 'turns', align: 'center' },
-      { text: 'TPS', value: 'tps', align: 'center' }
+      { text: 'TPS', value: 'tps', align: 'center' },
+      { text: 'Time', value: 'time', align: 'center', sortable: true }
     ]
 
-    private results = []
+    private results: object[] = []
 
     private mounted() {
         EventHub.$on(Events.cubeSolved, () => this.onCubeSolved())
+
         this.loadResults()
     }
 
@@ -54,19 +60,17 @@ export default class Results extends Vue {
       return milliseconds / 1000
     }
 
-    // TODO: We need to extract the information about the current game to be
-    // able to fill turns and tps. Something similar with the current scramble.
     private onCubeSolved() {
         this.results.unshift({
-            value: false,
-            scramble: this.scramble.join(' ') || 'Unknown',
+            scramble: this.game.scramble.join(' ') || 'Unknown',
             cross: this.seconds(Timer.getCrossSolveTime()),
             f2l: this.seconds(Timer.getF2l1SolveTime()),
             oll: this.seconds(Timer.getOllSolveTime()),
             pll: this.seconds(Timer.getPllSolveTime()),
             auf: this.seconds(Timer.getAUFTime()),
-            turns: 0,
-            tps: 0
+            turns: this.game.turns,
+            tps: this.game.tps(),
+            time: this.game.time / 1000
         })
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.results))
     }
@@ -78,8 +82,8 @@ export default class Results extends Vue {
         if (value) {
           this.results = JSON.parse(value)
         }
-      } finally {
-
+      } catch (Exception) {
+        this.results = []
       }
     }
 }

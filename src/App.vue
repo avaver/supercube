@@ -12,8 +12,8 @@
         <v-content>
             <v-container fluid grid-list-xl>
                 <v-layout justify-center column>
-                    <Scramble />
-                    <SolveTimer />
+                    <Scramble :game="game" />
+                    <SolveTimer :game="game" />
                     <v-container grid-list-xl>
                         <v-layout row wrap>
                             <v-flex xs12>
@@ -35,7 +35,7 @@
                                 <AUF />
                             </v-flex>
                             <v-flex xs12>
-                                <Results />
+                                <Results :game="game" />
                             </v-flex>
                         </v-layout>
                     </v-container>
@@ -80,6 +80,7 @@ import OLL from '@/components/cfop/OLL.vue'
 import PLL from '@/components/cfop/PLL.vue'
 import AUF from '@/components/cfop/AUF.vue'
 import CubeState from '@/classes/cube-state'
+import GameState from '@/classes/game-state'
 
 @Component({
     components: {
@@ -108,6 +109,8 @@ export default class App extends Vue {
     private snackbarColor = 'info'
     private snackbarText = ''
     private state = ''
+
+    private game = new GameState()
 
     private mounted() {
         this.nobluetooth = !Giiker.available()
