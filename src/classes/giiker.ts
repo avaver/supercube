@@ -48,7 +48,7 @@ export namespace Giiker {
         stepsHandler = onSteps
         batteryHandler = onBattery
 
-        const f = [{ namePrefix: 'GiC' }]
+        const f = [{ namePrefix: 'Gi' }]
         const s = [UUID.cubeService, UUID.configService]
 
         device = await navigator.bluetooth.requestDevice({ filters: f, optionalServices: s })
@@ -107,10 +107,24 @@ export namespace Giiker {
         }
     }
 
+    function decrypt(raw: Uint8Array): Uint8Array {
+      const data = raw
+      if (data[18] === 0xa7) { // decrypt
+        const key = [176,  81, 104, 224,  86, 137, 237, 119,  38,  26, 193, 161, 210, 126, 150,  81,  93,  13,
+                     236, 249,  89, 235,  88,  24, 113,  81, 214, 131, 130, 199,   2, 169,  39, 165, 171,  41]
+        const k1 = raw[19] >> 4 & 0xf // tslint:disable-line:no-bitwise
+        const k2 = raw[19] & 0xf // tslint:disable-line:no-bitwise
+        for (let i = 0; i < 18; i++) {
+          data[i] += key[i + k1] + key[i + k2]
+        }
+      }
+      return data
+    }
+
     function onCubeState(e: any) {
         stepsCount++
         if (stateHandler) {
-            stateHandler(new Uint8Array(e.target.value.buffer))
+            stateHandler(decrypt(new Uint8Array(e.target.value.buffer)))
         }
         if (stepsHandler) {
             stepsHandler(stepsCount)
