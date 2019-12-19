@@ -64,13 +64,13 @@ export default class Results extends Vue {
         this.results.unshift({
             scramble: this.game.scramble.join(' ') || 'Unknown',
             cross: this.seconds(Timer.getCrossSolveTime()),
-            f2l: this.seconds(Timer.getF2l1SolveTime()),
-            oll: this.seconds(Timer.getOllSolveTime()),
-            pll: this.seconds(Timer.getPllSolveTime()),
+            f2l: this.seconds(Timer.getF2lTime()),
+            oll: this.seconds(Timer.getOllTime()),
+            pll: this.seconds(Timer.getPllTime()),
             auf: this.seconds(Timer.getAUFTime()),
             turns: this.game.turns,
             tps: this.game.tps(),
-            time: this.game.time / 1000
+            time: this.seconds(Timer.getSolveTime())
         })
         localStorage.setItem(this.localStorageKey, JSON.stringify(this.results))
     }

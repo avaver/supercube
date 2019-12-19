@@ -176,6 +176,12 @@ export default class Timer {
         return Timer.getTime(Measurements.f2l4Solve, Marks.f2l4Inspection)
     }
 
+    public static getF2lTime(): number {
+        return Timer.getF2l1InspectionTime() + Timer.getF2l1SolveTime() + Timer.getF2l2InspectionTime()
+        + Timer.getF2l2SolveTime() + Timer.getF2l3InspectionTime() + Timer.getF2l3SolveTime()
+        + Timer.getF2l4InspectionTime() + Timer.getF2l4SolveTime()
+    }
+
     public static getOllInspectionTime(): number {
         return Timer.getTime(Measurements.ollInspection, Marks.f2l4Solve)
     }
@@ -184,12 +190,20 @@ export default class Timer {
         return Timer.getTime(Measurements.ollSolve, Marks.ollInspection)
     }
 
+    public static getOllTime(): number {
+        return Timer.getOllInspectionTime() + Timer.getOllSolveTime()
+    }
+
     public static getPllInspectionTime(): number {
         return Timer.getTime(Measurements.pllInspection, Marks.ollSolve)
     }
 
     public static getPllSolveTime(): number {
         return Timer.getTime(Measurements.pllSolve, Marks.pllInspection)
+    }
+
+    public static getPllTime(): number {
+        return Timer.getPllInspectionTime() + Timer.getPllSolveTime()
     }
 
     public static getAUFTime(): number {
